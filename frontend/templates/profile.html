@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Fashion Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light py-3">
+                <a class="navbar-brand" href="/">
+                    <h2 class="m-0">Fashion<span class="text-primary">Store</span></h2>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Categories
+                            </a>
+                            <ul class="dropdown-menu" id="categoryDropdown" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="/products?category=all">All Categories</a></li>
+                                <!-- Categories will be loaded dynamically -->
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products?category=sale">Sale</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact.html">Contact</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        <form class="d-flex me-2" id="searchForm">
+                            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="searchInput">
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                        <div class="d-flex">
+                            <a href="/cart.html" class="btn btn-outline-dark position-relative me-2">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary cart-count">0</span>
+                            </a>
+                            <div class="dropdown" id="userDropdown">
+                                <button class="btn btn-outline-dark dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                                    <!-- Dynamic content based on authentication -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="container py-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">My Account</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Account Section -->
+    <section class="container py-4 mb-5">
+        <div class="row">
+            <div class="col-lg-3">
+                <!-- Account Sidebar -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">My Account</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="#dashboard" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                        <a href="#orders" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                            <i class="fas fa-shopping-bag me-2"></i> My Orders
+                        </a>
+                        <a href="#wishlist" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                            <i class="fas fa-heart me-2"></i> Wishlist
+                        </a>
+                        <a href="#addresses" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                            <i class="fas fa-map-marker-alt me-2"></i> Addresses
+                        </a>
+                        <a href="#profile" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                            <i class="fas fa-user-edit me-2"></i> Account Details
+                        </a>
+                        <a href="#" id="logoutSidebarBtn" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="tab-content">
+                    <!-- Dashboard Tab -->
+                    <div class="tab-pane fade show active" id="dashboard">
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Dashboard</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                    Hello <strong id="userFullName">User</strong> (not <span id="userName">User</span>? <a href="#" id="logoutLink" class="text-decoration-none">Log out</a>)
+                                </p>
+                                <p>
+                                    From your account dashboard, you can view your <a href="#orders" data-bs-toggle="list" class="text-decoration-none">recent orders</a>, manage your
+                                    <a href="#addresses" data-bs-toggle="list" class="text-decoration-none">shipping and billing addresses</a>, and
+                                    <a href="#profile" data-bs-toggle="list" class="text-decoration-none">edit your password and account details</a>.
+                                </p>
+
+                                <div class="row mt-4">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card border-primary h-100">
+                                            <div class="card-body text-center d-flex flex-column">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-shopping-bag fa-3x text-primary"></i>
+                                                </div>
+                                                <h5 class="card-title">Your Orders</h5>
+                                                <p class="card-text">View and track your order history</p>
+                                                <a href="#orders" data-bs-toggle="list" class="btn btn-outline-primary mt-auto">View Orders</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card border-primary h-100">
+                                            <div class="card-body text-center d-flex flex-column">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-heart fa-3x text-primary"></i>
+                                                </div>
+                                                <h5 class="card-title">Wishlist</h5>
+                                                <p class="card-text">Products you've added to wishlist</p>
+                                                <a href="#wishlist" data-bs-toggle="list" class="btn btn-outline-primary mt-auto">View Wishlist</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card border-primary h-100">
+                                            <div class="card-body text-center d-flex flex-column">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-user-edit fa-3x text-primary"></i>
+                                                </div>
+                                                <h5 class="card-title">Account Details</h5>
+                                                <p class="card-text">Edit your profile and password</p>
+                                                <a href="#profile" data-bs-toggle="list" class="btn btn-outline-primary mt-auto">Edit Profile</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div class="tab-pane fade" id="orders">
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">My Orders</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Order</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                                <th>Total</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ordersList">
+                                            <tr>
+                                                <td colspan="5" class="text-center">Loading your orders...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wishlist Tab -->
+                    <div class="tab-pane fade" id="wishlist">
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">My Wishlist</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row" id="wishlistItems">
+                                    <div class="col-12 text-center">
+                                        <p>Loading your wishlist...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Addresses Tab -->
+                    <div class="tab-pane fade" id="addresses">
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">My Addresses</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card h-100">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Shipping Address</h6>
+                                                <button class="btn btn-sm btn-outline-primary" id="editShippingBtn">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="shippingAddressDisplay">
+                                                    <p class="mb-1" id="shippingName">No shipping address yet</p>
+                                                    <p class="mb-1" id="shippingAddress1"></p>
+                                                    <p class="mb-1" id="shippingAddress2"></p>
+                                                    <p class="mb-1" id="shippingCity"></p>
+                                                    <p class="mb-1" id="shippingState"></p>
+                                                    <p class="mb-1" id="shippingPostal"></p>
+                                                    <p class="mb-1" id="shippingCountry"></p>
+                                                    <p class="mb-0" id="shippingPhone"></p>
+                                                </div>
+                                                <div id="shippingAddressForm" style="display: none;">
+                                                    <form id="shippingForm">
+                                                        <div class="mb-3">
+                                                            <label for="shippingFullName" class="form-label">Full Name</label>
+                                                            <input type="text" class="form-control" id="shippingFullName" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="shippingAddressLine1" class="form-label">Address Line 1</label>
+                                                            <input type="text" class="form-control" id="shippingAddressLine1" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="shippingAddressLine2" class="form-label">Address Line 2</label>
+                                                            <input type="text" class="form-control" id="shippingAddressLine2">
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label for="shippingCity" class="form-label">City</label>
+                                                                <input type="text" class="form-control" id="shippingCityInput" required>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label for="shippingState" class="form-label">State/Province</label>
+                                                                <input type="text" class="form-control" id="shippingStateInput" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label for="shippingPostalCode" class="form-label">Postal Code</label>
+                                                                <input type="text" class="form-control" id="shippingPostalInput" required>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                                                                                <label for="shippingCountry" class="form-label">Country</label>
+                                                                <input type="text" class="form-control" id="shippingCountryInput" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="shippingPhone" class="form-label">Phone Number</label>
+                                                            <input type="tel" class="form-control" id="shippingPhoneInput" required>
+                                                        </div>
+                                                        <div class="d-flex justify-content-end">
+                                                            <button type="button" class="btn btn-outline-secondary me-2" id="cancelShippingBtn">Cancel</button>
+                                                            <button type="submit" class="btn btn-primary">Save Address</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card h-100">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Billing Address</h6>
+                                                <button class="btn btn-sm btn-outline-primary" id="editBillingBtn">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="billingAddressDisplay">
+                                                    <p class="mb-1" id="billingName">No billing address yet</p>
+                                                    <p class="mb-1" id="billingAddress1"></p>
+                                                    <p class="mb-1" id="billingAddress2"></p>
+                                                    <p class="mb-1" id="billingCity"></p>
+                                                    <p class="mb-1" id="billingState"></p>
+                                                    <p class="mb-1" id="billingPostal"></p>
+                                                    <p class="mb-1" id="billingCountry"></p>
+                                                    <p class="mb-0" id="billingPhone"></p>
+                                                </div>
+                                                <div id="billingAddressForm" style="display: none;">
+                                                    <form id="billingForm">
+                                                        <div class="mb-3">
+                                                            <label for="billingFullName" class="form-label">Full Name</label>
+                                                            <input type="text" class="form-control" id="billingFullName" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="billingAddressLine1" class="form-label">Address Line 1</label>
+                                                            <input type="text" class="form-control" id="billingAddressLine1" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="billingAddressLine2" class="form-label">Address Line 2</label>
+                                                            <input type="text" class="form-control" id="billingAddressLine2">
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label for="billingCity" class="form-label">City</label>
+                                                                <input type="text" class="form-control" id="billingCityInput" required>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label for="billingState" class="form-label">State/Province</label>
+                                                                <input type="text" class="form-control" id="billingStateInput" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label for="billingPostalCode" class="form-label">Postal Code</label>
+                                                                <input type="text" class="form-control" id="billingPostalInput" required>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label for="billingCountry" class="form-label">Country</label>
+                                                                <input type="text" class="form-control" id="billingCountryInput" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="billingPhone" class="form-label">Phone Number</label>
+                                                            <input type="tel" class="form-control" id="billingPhoneInput" required>
+                                                        </div>
+                                                        <div class="mb-3 form-check">
+                                                            <input type="checkbox" class="form-check-input" id="sameAsShipping">
+                                                            <label class="form-check-label" for="sameAsShipping">Same as shipping address</label>
+                                                        </div>
+                                                        <div class="d-flex justify-content-end">
+                                                            <button type="button" class="btn btn-outline-secondary me-2" id="cancelBillingBtn">Cancel</button>
+                                                            <button type="submit" class="btn btn-primary">Save Address</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Tab -->
+                    <div class="tab-pane fade" id="profile">
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Account Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="profileForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="firstName" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="firstName" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="lastName" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="lastName" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="displayName" class="form-label">Display Name</label>
+                                        <input type="text" class="form-control" id="displayName" required>
+                                        <div class="form-text">This will be how your name will be displayed in the account section and in reviews</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phoneNumber">
+                                    </div>
+
+                                    <h5 class="mt-4 mb-3">Password Change</h5>
+                                    <div class="mb-3">
+                                        <label for="currentPassword" class="form-label">Current Password (leave blank to leave unchanged)</label>
+                                        <input type="password" class="form-control" id="currentPassword">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="newPassword" class="form-label">New Password (leave blank to leave unchanged)</label>
+                                        <input type="password" class="form-control" id="newPassword">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                        <input type="password" class="form-control" id="confirmPassword">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-lg-3 mb-4">
+                    <h5 class="text-uppercase mb-4">Fashion Store</h5>
+                    <p>
+                        We offer the best clothing products for the most affordable prices.
+                    </p>
+                    <div class="d-flex">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-3 mb-4">
+                    <h5 class="text-uppercase mb-4">Shop</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/products?category=men" class="text-white text-decoration-none">Men's Clothing</a></li>
+                        <li class="mb-2"><a href="/products?category=women" class="text-white text-decoration-none">Women's Clothing</a></li>
+                        <li class="mb-2"><a href="/products?category=kids" class="text-white text-decoration-none">Kids' Clothing</a></li>
+                        <li class="mb-2"><a href="/products?category=accessories" class="text-white text-decoration-none">Accessories</a></li>
+                        <li><a href="/products?category=sale" class="text-white text-decoration-none">Sale</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 col-lg-3 mb-4">
+                    <h5 class="text-uppercase mb-4">Useful Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/account.html" class="text-white text-decoration-none">My Account</a></li>
+                        <li class="mb-2"><a href="/orders.html" class="text-white text-decoration-none">Track Order</a></li>
+                        <li class="mb-2"><a href="/wishlist.html" class="text-white text-decoration-none">Wishlist</a></li>
+                        <li class="mb-2"><a href="/about.html" class="text-white text-decoration-none">About Us</a></li>
+                        <li><a href="/contact.html" class="text-white text-decoration-none">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 col-lg-3 mb-4">
+                    <h5 class="text-uppercase mb-4">Contact</h5>
+                    <p>
+                        <i class="fas fa-home me-3"></i> 123 Street, City, Vietnam
+                    </p>
+                    <p>
+                        <i class="fas fa-envelope me-3"></i> info@fashionstore.com
+                    </p>
+                    <p>
+                        <i class="fas fa-phone me-3"></i> +84 123 456 789
+                    </p>
+                    <p>
+                        <i class="fas fa-clock me-3"></i> Mon-Sat: 9AM to 9PM
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-7 col-lg-8">
+                    <p>
+                        © 2023 <strong>Fashion Store</strong>. All Rights Reserved.
+                    </p>
+                </div>
+                <div class="col-md-5 col-lg-4">
+                    <div class="text-center text-md-end">
+                        <img src="/static/images/payment-methods.png" alt="Payment Methods" height="30">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/profile.js"></script>
+</body>
+</html>
