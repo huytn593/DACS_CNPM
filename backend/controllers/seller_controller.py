@@ -2,15 +2,15 @@ from ..models.product import ProductCreate, ProductUpdate
 from ..utils.database import get_product_collection
 from bson import ObjectId
 from fastapi import HTTPException, status
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 async def create_product(product: ProductCreate, seller_id: str):
     product_collection = get_product_collection()
 
-    product_dict = product.dict()
+    product_dict = product.model_dump()
     product_dict["seller_id"] = seller_id
-    product_dict["created_at"] = datetime.utcnow()
+    product_dict["created_at"] = datetime.now(UTC)
 
     result = await product_collection.insert_one(product_dict)
 
@@ -39,7 +39,7 @@ async def update_product(product_id: str, product_update: ProductUpdate, seller_
         )
 
     # Lọc ra các trường có giá trị để cập nhật
-    update_data = {k: v for k, v in product_update.dict(exclude_unset=True).items() if v is not None}
+    update_data = {k: v for k, v in product_update.model_dump(exclude_unset=True).items() if v is not None}
 
     if update_data:
         await product_collection.update_one(
