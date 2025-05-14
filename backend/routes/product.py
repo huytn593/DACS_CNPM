@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from typing import List, Optional
 from ..models.product import ProductResponse, ReviewCreate, ReportCreate
-from ..models.user import User
 from ..controllers.product_controller import (
-    get_products, 
-    get_product_by_id, 
+    get_products,
+    get_product_by_id,
     search_products,
     add_product_review,
     report_product
@@ -50,7 +49,7 @@ async def search(
 async def create_review(
     product_id: str,
     review: ReviewCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Thêm đánh giá cho sản phẩm (yêu cầu đăng nhập)
@@ -61,7 +60,7 @@ async def create_review(
 async def create_report(
     product_id: str,
     report: ReportCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Báo cáo sản phẩm vi phạm (yêu cầu đăng nhập)
