@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
+
 class ProductBase(BaseModel):
     name: str
     description: str
@@ -11,8 +12,10 @@ class ProductBase(BaseModel):
     stock: int = Field(..., ge=0)
     category: str
 
+
 class ProductCreate(ProductBase):
-    pass
+    image_urls: List[str] = []
+
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -22,14 +25,18 @@ class ProductUpdate(BaseModel):
     color: Optional[List[str]] = None
     stock: Optional[int] = Field(None, ge=0)
     category: Optional[str] = None
+    image_urls: Optional[List[str]] = None
+
 
 class ReviewCreate(BaseModel):
     rating: float = Field(..., ge=1, le=5)
     comment: Optional[str] = None
 
+
 class ReportCreate(BaseModel):
     description: str
     reported_link: Optional[str] = None
+
 
 class ReviewResponse(BaseModel):
     id: str
@@ -38,15 +45,24 @@ class ReviewResponse(BaseModel):
     rating: float
     comment: Optional[str]
     created_at: datetime
-    
+
     class Config:
         orm_mode = True
 
-class ProductResponse(ProductBase):
+
+class ProductResponse(BaseModel):
     id: str
+    name: str
+    description: str
+    price: float
+    size: List[str] = []
+    color: List[str] = []
+    stock: int = 0
+    category: str
     seller_id: str
+    image_urls: List[str] = []
     created_at: datetime
-    reviews: Optional[List[ReviewResponse]] = []
-    
+    reviews: List[ReviewResponse] = []
+
     class Config:
         orm_mode = True
