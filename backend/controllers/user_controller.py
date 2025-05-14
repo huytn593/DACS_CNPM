@@ -3,7 +3,7 @@ from ..utils.database import get_user_collection
 from ..utils.auth import get_password_hash, verify_password
 from fastapi import HTTPException, status
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 async def register_user(user: UserCreate):
@@ -21,13 +21,13 @@ async def register_user(user: UserCreate):
         )
 
     # Tạo user mới
-    user_dict = user.dict()
+    user_dict = user.model_dump()
 
     # Mã hóa mật khẩu
     user_dict["password"] = get_password_hash(user_dict["password"])
 
     # Thêm thời gian tạo
-    user_dict["created_at"] = datetime.utcnow()
+    user_dict["created_at"] = datetime.now(UTC)
 
     # Lưu vào database
     result = await user_collection.insert_one(user_dict)
@@ -99,7 +99,7 @@ async def update_user_profile(user_id: str, user_update: UserUpdate):
     user_collection = get_user_collection()
 
     # Lọc ra các trường cần cập nhật
-    update_data = {k: v for k, v in user_update.dict(exclude_unset=True).items() if v is not None}
+    update_data = {k: v for k, v in user_update.model_dump(exclude_unset=True).items() if v is not None}
 
     # Mã hóa mật khẩu nếu có
     if "password" in update_data:
