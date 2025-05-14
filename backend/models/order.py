@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict
 from datetime import datetime
 from .product import ProductResponse
@@ -23,9 +23,7 @@ class OrderItemResponse(BaseModel):
     size: Optional[str] = None
     color: Optional[str] = None
 
-    class Config:
-        orm_mode = True
-
+    model_config = ConfigDict(from_attributes=True)
 
 class OrderCreate(BaseModel):
     shipping_info: ShippingInfo
@@ -48,5 +46,4 @@ class OrderResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

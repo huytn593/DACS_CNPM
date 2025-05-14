@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -15,13 +15,15 @@ class UserCreate(UserBase):
     role: str = "user"  # Mặc định là "user"
 
     @field_validator('role')
-    def validate_role(self, v):
+    @classmethod
+    def validate_role(cls, v):
         if v not in ["user", "seller", "admin"]:
             raise ValueError('Role must be one of: user, seller, admin')
         return v
 
     @field_validator('phone_number')
-    def validate_phone(self, v):
+    @classmethod
+    def validate_phone(cls, v):
         if not v.startswith('0') or not v.isdigit() or len(v) != 10:
             raise ValueError('Phone number must be 10 digits and start with 0')
         return v
@@ -34,7 +36,8 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
 
     @field_validator('phone_number')
-    def validate_phone(self, v):
+    @classmethod
+    def validate_phone(cls, v):
         if v is not None:
             if not v.startswith('0') or not v.isdigit() or len(v) != 10:
                 raise ValueError('Phone number must be 10 digits and start with 0')
@@ -46,6 +49,4 @@ class UserResponse(UserBase):
     role: str
     created_at: datetime
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = ConfigDict(from_attributes=True)
