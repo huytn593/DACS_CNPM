@@ -31,12 +31,12 @@
                                 Categories
                             </a>
                             <ul class="dropdown-menu" id="categoryDropdown" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="/api/products?category=all">All Categories</a></li>
+                                <li><a class="dropdown-item" href="products.html?category=all">All Categories</a></li>
                                 <!-- Categories will be loaded dynamically -->
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/api/products?category=sale">Sale</a>
+                            <a class="nav-link" href="products.html?category=sale">Sale</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="contact.html">Contact</a>
@@ -75,7 +75,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="account.html">My Account</a></li>
+                <li class="breadcrumb-item"><a href="profile.html">My Account</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Order Details</li>
             </ol>
         </nav>
@@ -91,19 +91,19 @@
                         <h5 class="mb-0">My Account</h5>
                     </div>
                     <div class="list-group list-group-flush">
-                        <a href="account.html" class="list-group-item list-group-item-action">
+                        <a href="profile.html" class="list-group-item list-group-item-action">
                             <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                         </a>
-                        <a href="account.html#orders" class="list-group-item list-group-item-action active">
+                        <a href="profile.html#orders" class="list-group-item list-group-item-action active">
                             <i class="fas fa-shopping-bag me-2"></i> My Orders
                         </a>
                         <a href="wishlist.html" class="list-group-item list-group-item-action">
                             <i class="fas fa-heart me-2"></i> Wishlist
                         </a>
-                        <a href="account.html#addresses" class="list-group-item list-group-item-action">
+                        <a href="profile.html#addresses" class="list-group-item list-group-item-action">
                             <i class="fas fa-map-marker-alt me-2"></i> Addresses
                         </a>
-                        <a href="account.html#profile" class="list-group-item list-group-item-action">
+                        <a href="profile.html#profile" class="list-group-item list-group-item-action">
                             <i class="fas fa-user-edit me-2"></i> Account Details
                         </a>
                         <a href="#" id="logoutSidebarBtn" class="list-group-item list-group-item-action text-danger">
@@ -170,7 +170,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="/frontend/static/images/product-1.jpg" width="60" class="img-fluid rounded me-3" alt="Product">
+                                                <img src="/frontend/static/images/Dat.jpg" width="172" class="img-fluid rounded me-3" alt="Product">
                                                 <div>
                                                     <h6 class="mb-0">Men's T-Shirt</h6>
                                                     <small class="text-muted">Size: L, Color: Blue</small>
@@ -184,7 +184,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="/frontend/static/images/product-2.jpg" width="60" class="img-fluid rounded me-3" alt="Product">
+                                                <img src="/frontend/static/images/Dat.jpg" width="172" class="img-fluid rounded me-3" alt="Product">
                                                 <div>
                                                     <h6 class="mb-0">Running Shoes</h6>
                                                     <small class="text-muted">Size: 10, Color: Black</small>
@@ -274,7 +274,7 @@
                         </div>
 
                         <div class="mt-4 d-flex justify-content-between">
-                            <a href="account.html#orders" class="btn btn-outline-primary">
+                            <a href="profile.html#orders" class="btn btn-outline-primary">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Orders
                             </a>
                             <button class="btn btn-primary" id="downloadInvoiceBtn">
@@ -306,18 +306,18 @@
                 <div class="col-md-3 col-lg-3 mb-4">
                     <h5 class="text-uppercase mb-4">Shop</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/api/products?category=men" class="text-white text-decoration-none">Men's Clothing</a></li>
-                        <li class="mb-2"><a href="/api/products?category=women" class="text-white text-decoration-none">Women's Clothing</a></li>
-                        <li class="mb-2"><a href="/api/products?category=kids" class="text-white text-decoration-none">Kids' Clothing</a></li>
-                        <li class="mb-2"><a href="/api/products?category=accessories" class="text-white text-decoration-none">Accessories</a></li>
-                        <li><a href="/api/products?category=sale" class="text-white text-decoration-none">Sale</a></li>
+                        <li class="mb-2"><a href="products.html?category=men" class="text-white text-decoration-none">Men's Clothing</a></li>
+                        <li class="mb-2"><a href="products.html?category=women" class="text-white text-decoration-none">Women's Clothing</a></li>
+                        <li class="mb-2"><a href="products.html?category=kids" class="text-white text-decoration-none">Kids' Clothing</a></li>
+                        <li class="mb-2"><a href="products.html?category=accessories" class="text-white text-decoration-none">Accessories</a></li>
+                        <li><a href="products.html?category=sale" class="text-white text-decoration-none">Sale</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3 col-lg-3 mb-4">
                     <h5 class="text-uppercase mb-4">Useful Links</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="account.html" class="text-white text-decoration-none">My Account</a></li>
-                        <li class="mb-2"><a href="account.html#orders" class="text-white text-decoration-none">Track Order</a></li>
+                        <li class="mb-2"><a href="profile.html" class="text-white text-decoration-none">My Account</a></li>
+                        <li class="mb-2"><a href="profile.html#orders" class="text-white text-decoration-none">Track Order</a></li>
                         <li class="mb-2"><a href="wishlist.html" class="text-white text-decoration-none">Wishlist</a></li>
                         <li class="mb-2"><a href="about.html" class="text-white text-decoration-none">About Us</a></li>
                         <li><a href="contact.html" class="text-white text-decoration-none">Contact Us</a></li>
@@ -358,6 +358,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/frontend/static/js/common.js"></script>
     <script src="/frontend/static/js/main.js"></script>
-    <script src="/frontend/static/js/order-detail.js"></script>
+    <script src="/frontend/static/js/order_detail.js"></script>
 </body>
 </html>

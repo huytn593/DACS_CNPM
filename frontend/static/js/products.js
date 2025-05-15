@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Tải danh mục sản phẩm
 async function taiDanhMuc() {
     try {
-        const response = await fetch('/api/categories');
+        const response = await fetch('/categories');
         const categories = await response.json();
 
         const categoryFilter = document.getElementById('categoryFilter');
@@ -139,7 +139,7 @@ async function taiDanhSachSanPham() {
 
     try {
         // Xây dựng URL với các tham số
-        let url = '/api/products?skip=' + ((trangHienTai - 1) * 9) + '&limit=9';
+        let url = '/products?skip=' + ((trangHienTai - 1) * 9) + '&limit=9';
 
         // Thêm bộ lọc danh mục
         if (boLocHienTai.category) {
@@ -400,7 +400,7 @@ async function timKiemSanPham(tuKhoa) {
     document.getElementById('noProductsMessage').classList.add('d-none');
 
     try {
-        const response = await fetch(`/api/products/search?query=${encodeURIComponent(tuKhoa)}`);
+        const response = await fetch(`/products/search?query=${encodeURIComponent(tuKhoa)}`);
         const products = await response.json();
 
         hienThiDanhSachSanPham(products);
@@ -420,7 +420,7 @@ async function timKiemSanPham(tuKhoa) {
 // Xem nhanh sản phẩm
 async function xemNhanhSanPham(productId) {
     try {
-        const response = await fetch(`/api/products/${productId}`);
+        const response = await fetch(`/products/${productId}`);
         const product = await response.json();
 
         // Tính trung bình đánh giá
@@ -510,7 +510,7 @@ function themVaoGioHang(productId) {
     }
 
     // Thêm sản phẩm vào giỏ hàng (sử dụng API)
-    fetch('/api/cart/items', {
+    fetch('/cart/items', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -550,7 +550,7 @@ function themVaoDanhSachYeuThich(productId) {
     }
 
     // Thêm sản phẩm vào danh sách yêu thích (sử dụng API)
-    fetch('/api/wishlist/items', {
+    fetch('/wishlist/items', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -640,7 +640,7 @@ function capNhatSoLuongGioHang() {
     const userToken = localStorage.getItem('userToken');
     if (!userToken) return;
 
-    fetch('/api/cart', {
+    fetch('/cart', {
         headers: {
             'Authorization': `Bearer ${userToken}`
         }

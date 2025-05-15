@@ -7,7 +7,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (orderId) {
         fetchOrderDetails(orderId);
     } else {
+        // Show error and redirect after a short delay
         showError('Order ID not provided');
+        setTimeout(() => {
+            window.location.href = '/orders.html';  // or your orders list page
+        }, 3000);
     }
 
     // Download invoice button
@@ -28,7 +32,7 @@ async function fetchOrderDetails(orderId) {
             return;
         }
 
-        const response = await fetch(`/api/orders/${orderId}`, {
+        const response = await fetch(`/orders/${orderId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -342,18 +346,25 @@ async function downloadInvoice(orderId) {
 
 // Show error message
 function showError(message) {
-    const container = document.querySelector('.container.py-4');
-    container.innerHTML = `
-        <div class="alert alert-danger text-center my-5" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            ${message}
-            <div class="mt-3">
-                <a href="account.html#orders" class="btn btn-outline-danger">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
-                </a>
-            </div>
-        </div>
-    `;
+    // Create or update error element
+    let errorElement = document.getElementById('errorMessage');
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.id = 'errorMessage';
+        errorElement.className = 'alert alert-danger my-3';
+        // Insert it at the beginning of the main content area
+        const mainContent = document.querySelector('.container.py-4');
+        if (mainContent) {
+            mainContent.insertBefore(errorElement, mainContent.firstChild);
+        } else {
+            document.body.insertBefore(errorElement, document.body.firstChild);
+        }
+    }
+
+    errorElement.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
+
+    // Scroll to the error message
+    window.scrollTo(0, 0);
 }
 
 // Helper function to capitalize first letter of a string
