@@ -33,6 +33,13 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone_number: Optional[str] = None
     shipping_address: Optional[str] = None
+    shipping_city: Optional[str] = None
+    shipping_district: Optional[str] = None
+    shipping_postal_code: Optional[str] = None
+    billing_address: Optional[str] = None
+    billing_city: Optional[str] = None
+    billing_district: Optional[str] = None
+    billing_postal_code: Optional[str] = None
     password: Optional[str] = None
 
     @field_validator('phone_number')
@@ -43,10 +50,22 @@ class UserUpdate(BaseModel):
                 raise ValueError('Phone number must be 10 digits and start with 0')
         return v
 
-
 class UserResponse(UserBase):
     id: str
     role: str
     created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+class UserBase(BaseModel):
+    email: EmailStr
+    full_name: str
+    phone_number: str
+    shipping_address: Optional[str] = None
+    shipping_city: Optional[str] = None
+    shipping_district: Optional[str] = None
+    shipping_postal_code: Optional[str] = None
+    billing_address: Optional[str] = None
+    billing_city: Optional[str] = None
+    billing_district: Optional[str] = None
+    billing_postal_code: Optional[str] = None
+
+model_config = ConfigDict(from_attributes=True)

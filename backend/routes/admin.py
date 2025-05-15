@@ -50,27 +50,29 @@ async def admin_get_products(
     return await get_all_products(skip=skip, limit=limit, category=category)
 
 
-@router.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-async def admin_create_product(
-        product: ProductCreate,
-        _=Depends(admin_required)
-):
-    """
-    Create a new product
-    """
-    return await create_product(product)
+# Admin should not be able to create products, only sellers can
+# @router.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+# async def admin_create_product(
+#         product: ProductCreate,
+#         _=Depends(admin_required)
+# ):
+#     """
+#     Create a new product
+#     """
+#     return await create_product(product)
 
 
-@router.put("/products/{product_id}", response_model=ProductResponse)
-async def admin_update_product(
-        product_id: str = Path(...),
-        product: ProductUpdate = Body(...),
-        _=Depends(admin_required)
-):
-    """
-    Update an existing product
-    """
-    return await update_product(product_id, product)
+# Admin should not be able to update products, only sellers can
+# @router.put("/products/{product_id}", response_model=ProductResponse)
+# async def admin_update_product(
+#         product_id: str = Path(...),
+#         product: ProductUpdate = Body(...),
+#         _=Depends(admin_required)
+# ):
+#     """
+#     Update an existing product
+#     """
+#     return await update_product(product_id, product)
 
 
 @router.delete("/products/{product_id}")
@@ -200,3 +202,37 @@ async def admin_delete_category(
     Delete a product category
     """
     return await delete_category(category_id)
+# Trong file routes/admin.py
+@router.get("/stats/sales", response_model=Dict[str, Any])
+async def get_sales_stats(
+    date_range: str = Query("week", enum=["day", "week", "month", "year"]),
+    current_user = Depends(get_admin_user)
+):
+    """Get sales statistics for admin dashboard"""
+    return await get_admin_sales_stats(date_range)
+@router.get("/dashboard/stats", response_model=DashboardStats)
+async def get_dashboard_stats(current_user=Depends(get_admin_user)):
+    """Lấy thống kê tổng quan cho dashboard"""
+    return await get_admin_dashboard_stats()
+
+@router.get("/dashboard/sales", response_model=SalesStats)
+async def get_sales_stats(
+    date_range: str = Query("week", enum=["day", "week", "month", "year"]),
+    current_user=Depends(get_admin_user)
+):
+    """Lấy thống kê doanh số theo khoảng thời gian"""
+    return await get_admin_sales_stats(date_range)
+
+# Tương tự trong file backend/routes/seller.py
+@router.get("/dashboard/stats", response_model=SellerDashboardStats)
+async def get_seller_dashboard_stats(current_user=Depends(get_seller_user)):
+    """Lấy thống kê tổng quan cho seller dashboard"""
+    return await get_seller_dashboard_stats(current_user["id"])
+
+@router.get("/dashboard/sales", response_model=SellerSalesStats)
+async def get_seller_sales_stats(
+    date_range: str = Query("week", enum=["day", "week", "month", "year"]),
+    current_user=Depends(get_seller_user)
+):
+    """Lấy thống kê doanh số seller theo khoảng thời gian"""
+    return await get_seller_sales_stats(current_user["id"], date_range)

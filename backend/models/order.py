@@ -11,7 +11,7 @@ class ShippingInfo(BaseModel):
     address: str
     city: str
     district: str
-    zip_code: Optional[str] = None
+    postal_code: Optional[str] = None
     notes: Optional[str] = None
 
 

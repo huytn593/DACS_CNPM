@@ -91,7 +91,6 @@ async def get_user_profile(user_id: str):
 
     return user
 
-
 async def update_user_profile(user_id: str, user_update: UserUpdate):
     """
     Cập nhật hồ sơ người dùng

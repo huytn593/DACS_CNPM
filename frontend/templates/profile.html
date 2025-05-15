@@ -217,153 +217,78 @@
                     </div>
 
                     <!-- Addresses Tab -->
-                    <div class="tab-pane fade" id="addresses">
-                        <div class="card">
-                            <div class="card-header bg-white">
-                                <h5 class="mb-0">My Addresses</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0">Shipping Address</h6>
-                                                <button class="btn btn-sm btn-outline-primary" id="editShippingBtn">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </button>
-                                            </div>
-                                            <div class="card-body">
-                                                <div id="shippingAddressDisplay">
-                                                    <p class="mb-1" id="shippingName">No shipping address yet</p>
-                                                    <p class="mb-1" id="shippingAddress1"></p>
-                                                    <p class="mb-1" id="shippingAddress2"></p>
-                                                    <p class="mb-1" id="shippingCity"></p>
-                                                    <p class="mb-1" id="shippingState"></p>
-                                                    <p class="mb-1" id="shippingPostal"></p>
-                                                    <p class="mb-1" id="shippingCountry"></p>
-                                                    <p class="mb-0" id="shippingPhone"></p>
-                                                </div>
-                                                <div id="shippingAddressForm" style="display: none;">
-                                                    <form id="shippingForm">
-                                                        <div class="mb-3">
-                                                            <label for="shippingFullName" class="form-label">Full Name</label>
-                                                            <input type="text" class="form-control" id="shippingFullName" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="shippingAddressLine1" class="form-label">Address Line 1</label>
-                                                            <input type="text" class="form-control" id="shippingAddressLine1" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="shippingAddressLine2" class="form-label">Address Line 2</label>
-                                                            <input type="text" class="form-control" id="shippingAddressLine2">
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label for="shippingCity" class="form-label">City</label>
-                                                                <input type="text" class="form-control" id="shippingCityInput" required>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label for="shippingState" class="form-label">State/Province</label>
-                                                                <input type="text" class="form-control" id="shippingStateInput" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label for="shippingPostalCode" class="form-label">Postal Code</label>
-                                                                <input type="text" class="form-control" id="shippingPostalInput" required>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                                                                                <label for="shippingCountry" class="form-label">Country</label>
-                                                                <input type="text" class="form-control" id="shippingCountryInput" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="shippingPhone" class="form-label">Phone Number</label>
-                                                            <input type="tel" class="form-control" id="shippingPhoneInput" required>
-                                                        </div>
-                                                        <div class="d-flex justify-content-end">
-                                                            <button type="button" class="btn btn-outline-secondary me-2" id="cancelShippingBtn">Cancel</button>
-                                                            <button type="submit" class="btn btn-primary">Save Address</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0">Billing Address</h6>
-                                                <button class="btn btn-sm btn-outline-primary" id="editBillingBtn">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </button>
-                                            </div>
-                                            <div class="card-body">
-                                                <div id="billingAddressDisplay">
-                                                    <p class="mb-1" id="billingName">No billing address yet</p>
-                                                    <p class="mb-1" id="billingAddress1"></p>
-                                                    <p class="mb-1" id="billingAddress2"></p>
-                                                    <p class="mb-1" id="billingCity"></p>
-                                                    <p class="mb-1" id="billingState"></p>
-                                                    <p class="mb-1" id="billingPostal"></p>
-                                                    <p class="mb-1" id="billingCountry"></p>
-                                                    <p class="mb-0" id="billingPhone"></p>
-                                                </div>
-                                                <div id="billingAddressForm" style="display: none;">
-                                                    <form id="billingForm">
-                                                        <div class="mb-3">
-                                                            <label for="billingFullName" class="form-label">Full Name</label>
-                                                            <input type="text" class="form-control" id="billingFullName" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="billingAddressLine1" class="form-label">Address Line 1</label>
-                                                            <input type="text" class="form-control" id="billingAddressLine1" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="billingAddressLine2" class="form-label">Address Line 2</label>
-                                                            <input type="text" class="form-control" id="billingAddressLine2">
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label for="billingCity" class="form-label">City</label>
-                                                                <input type="text" class="form-control" id="billingCityInput" required>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label for="billingState" class="form-label">State/Province</label>
-                                                                <input type="text" class="form-control" id="billingStateInput" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label for="billingPostalCode" class="form-label">Postal Code</label>
-                                                                <input type="text" class="form-control" id="billingPostalInput" required>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label for="billingCountry" class="form-label">Country</label>
-                                                                <input type="text" class="form-control" id="billingCountryInput" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="billingPhone" class="form-label">Phone Number</label>
-                                                            <input type="tel" class="form-control" id="billingPhoneInput" required>
-                                                        </div>
-                                                        <div class="mb-3 form-check">
-                                                            <input type="checkbox" class="form-check-input" id="sameAsShipping">
-                                                            <label class="form-check-label" for="sameAsShipping">Same as shipping address</label>
-                                                        </div>
-                                                        <div class="d-flex justify-content-end">
-                                                            <button type="button" class="btn btn-outline-secondary me-2" id="cancelBillingBtn">Cancel</button>
-                                                            <button type="submit" class="btn btn-primary">Save Address</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Addresses Tab -->
+<div class="tab-pane fade" id="addresses">
+    <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">My Addresses</h5>
+        </div>
+        <div class="card-body">
+            <form id="addressForm">
+                <h6 class="mb-3">Shipping Address</h6>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="shippingAddress" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="shippingAddress" name="shipping_address">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="shippingCity" class="form-label">City</label>
+                        <input type="text" class="form-control" id="shippingCity" name="shipping_city">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="shippingDistrict" class="form-label">District</label>
+                        <input type="text" class="form-control" id="shippingDistrict" name="shipping_district">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="shippingPostalCode" class="form-label">Postal Code</label>
+                        <input type="text" class="form-control" id="shippingPostalCode" name="shipping_postal_code">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sameAsShipping">
+                        <label class="form-check-label" for="sameAsShipping">
+                            Billing address same as shipping
+                        </label>
+                    </div>
+                </div>
+
+                <div id="billingAddressSection">
+                    <h6 class="mb-3">Billing Address</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="billingAddress" class="form-label">Address</label>
+                            <input type="text" class="form-control" id="billingAddress" name="billing_address">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="billingCity" class="form-label">City</label>
+                            <input type="text" class="form-control" id="billingCity" name="billing_city">
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="billingDistrict" class="form-label">District</label>
+                            <input type="text" class="form-control" id="billingDistrict" name="billing_district">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="billingPostalCode" class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" id="billingPostalCode" name="billing_postal_code">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Save Addresses</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
                     <!-- Profile Tab -->
                     <div class="tab-pane fade" id="profile">
@@ -488,7 +413,6 @@
             </div>
         </div>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/main.js"></script>
     <script src="/static/js/profile.js"></script>

@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import os
-from .routes import user, product, order, seller, admin
+from .routes import user, product, order, seller, admin, review, report, stats
 from .utils.database import check_connection
 
 app = FastAPI(title="E-commerce API")
@@ -26,7 +26,9 @@ app.include_router(product.router)
 app.include_router(order.router)
 app.include_router(seller.router)
 app.include_router(admin.router)
-
+app.include_router(review.router)
+app.include_router(report.router)
+app.include_router(stats.router)
 
 @app.get("/")
 async def root():

@@ -87,11 +87,7 @@ async function initializeDashboard() {
 
 // Khởi tạo sự kiện cho các forms
 function initializeForms() {
-    // Form thêm sản phẩm
-    document.getElementById('saveProductBtn').addEventListener('click', handleAddProduct);
-
-    // Form chỉnh sửa sản phẩm
-    document.getElementById('updateProductBtn').addEventListener('click', handleUpdateProduct);
+    // Removed event listeners for add and update product buttons as only sellers can add/edit products
 
     // Form thêm người dùng
     document.getElementById('saveUserBtn').addEventListener('click', handleAddUser);
@@ -341,10 +337,10 @@ async function loadRecentOrders() {
                     </button>
                 </td>
             `;
-            
+
             recentOrdersList.appendChild(row);
         });
-        
+
         // Thêm event listeners cho các nút
         document.querySelectorAll('.view-order-btn').forEach(button => {
             button.addEventListener('click', () => {
@@ -352,7 +348,7 @@ async function loadRecentOrders() {
                 openOrderDetailsModal(orderId);
             });
         });
-        
+
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('recentOrdersList').innerHTML = `
@@ -367,46 +363,46 @@ async function loadRecentOrders() {
 async function loadCategories() {
     try {
         const response = await fetch('/categories');
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch categories');
         }
-        
+
         const categories = await response.json();
-        
+
         // Cập nhật select trong modal thêm sản phẩm
         const productCategorySelect = document.getElementById('productCategory');
         productCategorySelect.innerHTML = '<option value="" selected disabled>Select a category</option>';
-        
+
         categories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.id;
             option.textContent = category.name;
             productCategorySelect.appendChild(option);
         });
-        
+
         // Cập nhật select cho modal chỉnh sửa sản phẩm
         const editProductCategorySelect = document.getElementById('editProductCategory');
         editProductCategorySelect.innerHTML = '<option value="" selected disabled>Select a category</option>';
-        
+
         categories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.id;
             option.textContent = category.name;
             editProductCategorySelect.appendChild(option);
         });
-        
+
         // Cập nhật select cho bộ lọc sản phẩm
         const categoryFilterSelect = document.getElementById('productCategoryFilter');
         categoryFilterSelect.innerHTML = '<option value="">All Categories</option>';
-        
+
         categories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.id;
             option.textContent = category.name;
             categoryFilterSelect.appendChild(option);
         });
-        
+
     } catch (error) {
         console.error('Error:', error);
         showAlert('Failed to load categories', 'danger');
@@ -419,43 +415,43 @@ async function loadProducts(page = 1) {
     const searchQuery = document.getElementById('productSearchInput').value.trim();
     const categoryFilter = document.getElementById('productCategoryFilter').value;
     const statusFilter = document.getElementById('productStatusFilter').value;
-    
+
     try {
         // Xây dựng URL với các tham số
         let url = `/admin/products?page=${page}`;
-        
+
         if (searchQuery) {
             url += `&search=${encodeURIComponent(searchQuery)}`;
         }
-        
+
         if (categoryFilter) {
             url += `&category=${categoryFilter}`;
         }
-        
+
         if (statusFilter) {
             url += `&status=${statusFilter}`;
         }
-        
+
         const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch products');
         }
-        
+
         const data = await response.json();
         const products = data.products;
         const totalPages = data.total_pages;
-        
+
         // Hiển thị sản phẩm
         displayProducts(products);
-        
+
         // Tạo phân trang
         createPagination(page, totalPages, 'productsPagination', loadProducts);
-        
+
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('productsList').innerHTML = `
@@ -469,7 +465,7 @@ async function loadProducts(page = 1) {
 // Hiển thị danh sách sản phẩm
 function displayProducts(products) {
     const productsListElement = document.getElementById('productsList');
-    
+
     if (products.length === 0) {
         productsListElement.innerHTML = `
             <tr>
@@ -478,12 +474,12 @@ function displayProducts(products) {
         `;
         return;
     }
-    
+
     productsListElement.innerHTML = '';
-    
+
     products.forEach(product => {
         const row = document.createElement('tr');
-        
+
         // Xác định trạng thái sản phẩm
         let statusBadge = '';
         if (product.stock <= 0) {
@@ -493,7 +489,7 @@ function displayProducts(products) {
         } else {
             statusBadge = '<span class="badge bg-success">In Stock</span>';
         }
-        
+
         row.innerHTML = `
             <td>
                 <img src="${product.image || '/static/images/product-placeholder.jpg'}" class="img-thumbnail" width="50" alt="${product.name}">
@@ -505,33 +501,25 @@ function displayProducts(products) {
             <td>${statusBadge}</td>
             <td>
                 <div class="btn-group btn-group-sm" role="group">
-                    <button type="button" class="btn btn-outline-primary edit-product-btn" data-product-id="${product.id}">
-                        <i class="fas fa-edit"></i>
-                    </button>
+                    <!-- Removed edit button as only sellers can edit products -->
                     <button type="button" class="btn btn-outline-danger delete-product-btn" data-product-id="${product.id}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </td>
         `;
-        
+
         productsListElement.appendChild(row);
     });
-    
+
     // Thêm event listeners cho các nút
     addProductButtonEventListeners();
 }
 
 // Thêm event listeners cho các nút trong bảng sản phẩm
 function addProductButtonEventListeners() {
-    // Nút chỉnh sửa sản phẩm
-    document.querySelectorAll('.edit-product-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const productId = button.getAttribute('data-product-id');
-            openEditProductModal(productId);
-        });
-    });
-    
+    // Removed edit button event listener as only sellers can edit products
+
     // Nút xóa sản phẩm
     document.querySelectorAll('.delete-product-btn').forEach(button => {
         button.addEventListener('click', () => {
@@ -544,20 +532,20 @@ function addProductButtonEventListeners() {
 // Mở modal chỉnh sửa sản phẩm
 async function openEditProductModal(productId) {
     const token = localStorage.getItem('accessToken');
-    
+
     try {
         const response = await fetch(`/admin/products/${productId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch product details');
         }
-        
+
         const product = await response.json();
-        
+
         // Fill form với thông tin sản phẩm
         document.getElementById('editProductId').value = product.id;
         document.getElementById('editProductName').value = product.name;
@@ -565,28 +553,28 @@ async function openEditProductModal(productId) {
         document.getElementById('editProductPrice').value = product.price;
         document.getElementById('editProductStock').value = product.stock;
         document.getElementById('editProductCategory').value = product.category_id;
-        
+
         // Hiển thị hình ảnh sản phẩm hiện tại
         if (product.image) {
             document.getElementById('currentProductImage').src = product.image;
         } else {
             document.getElementById('currentProductImage').src = '/static/images/product-placeholder.jpg';
         }
-        
+
         // Chọn các size có sẵn
         document.querySelectorAll('.edit-size-options input[type="checkbox"]').forEach(checkbox => {
             checkbox.checked = product.size.includes(checkbox.value);
         });
-        
+
         // Chọn các màu có sẵn
         document.querySelectorAll('.edit-color-options input[type="checkbox"]').forEach(checkbox => {
             checkbox.checked = product.color.includes(checkbox.value);
         });
-        
+
         // Hiển thị modal
         const editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
         editProductModal.show();
-        
+
     } catch (error) {
         console.error('Error:', error);
         showAlert('Failed to load product details', 'danger');
@@ -603,7 +591,7 @@ function confirmDeleteProduct(productId) {
 // Xóa sản phẩm
 async function deleteProduct(productId) {
     const token = localStorage.getItem('accessToken');
-    
+
     try {
         const response = await fetch(`/admin/products/${productId}`, {
             method: 'DELETE',
@@ -611,214 +599,45 @@ async function deleteProduct(productId) {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to delete product');
         }
-        
+
         // Hiển thị thông báo thành công
         showAlert('Product deleted successfully', 'success');
-        
+
         // Tải lại danh sách sản phẩm
         loadProducts();
-        
+
         // Cập nhật tổng quan dashboard
         loadDashboardOverview();
-        
+
     } catch (error) {
         console.error('Error:', error);
         showAlert('Failed to delete product', 'danger');
     }
 }
 
-// Xử lý thêm sản phẩm mới
+// Xử lý thêm sản phẩm mới - Disabled for admin as only sellers can add products
 async function handleAddProduct() {
-    const token = localStorage.getItem('accessToken');
-    
-    // Lấy dữ liệu từ form
-    const name = document.getElementById('productName').value;
-    const description = document.getElementById('productDescription').value;
-    const price = parseFloat(document.getElementById('productPrice').value);
-    const stock = parseInt(document.getElementById('productStock').value);
-    const category = document.getElementById('productCategory').value;
-    
-    // Lấy size đã chọn
-    const selectedSizes = [];
-    document.querySelectorAll('.size-options input[type="checkbox"]:checked').forEach(checkbox => {
-        selectedSizes.push(checkbox.value);
-    });
-    
-    // Lấy màu sắc đã chọn
-    const selectedColors = [];
-    document.querySelectorAll('.color-options input[type="checkbox"]:checked').forEach(checkbox => {
-        selectedColors.push(checkbox.value);
-    });
-    
-    // Kiểm tra dữ liệu
-    if (!name || !description || isNaN(price) || isNaN(stock) || !category) {
-        showAlert('Please fill in all required fields', 'warning');
-        return;
-    }
-    
-    if (selectedSizes.length === 0) {
-        showAlert('Please select at least one size', 'warning');
-        return;
-    }
-    
-    if (selectedColors.length === 0) {
-        showAlert('Please select at least one color', 'warning');
-        return;
-    }
-    
-    // Tạo đối tượng sản phẩm
-    const productData = {
-        name: name,
-        description: description,
-        price: price,
-        stock: stock,
-        category_id: category,
-        size: selectedSizes,
-        color: selectedColors
-    };
-    
-    try {
-        const response = await fetch('/admin/products', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(productData)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to add product');
-        }
-        
-        const result = await response.json();
-        
-        // Xử lý upload hình ảnh (nếu có)
-        const imageInput = document.getElementById('productImage');
-        if (imageInput.files.length > 0) {
-            await uploadProductImage(result.id, imageInput.files[0]);
-        }
-        
-        // Hiển thị thông báo thành công
-        showAlert('Product added successfully', 'success');
-        
-        // Đóng modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
-        modal.hide();
-        
-        // Reset form
-        document.getElementById('addProductForm').reset();
-        
-        // Tải lại danh sách sản phẩm
-        loadProducts();
-        
-        // Cập nhật tổng quan dashboard
-        loadDashboardOverview();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('Failed to add product', 'danger');
-    }
+    showAlert('Only sellers can add products', 'warning');
+    return;
 }
 
-// Cập nhật sản phẩm
+// Cập nhật sản phẩm - Disabled for admin as only sellers can update products
 async function handleUpdateProduct() {
-    const token = localStorage.getItem('accessToken');
-    const productId = document.getElementById('editProductId').value;
-    
-    // Lấy dữ liệu từ form
-    const name = document.getElementById('editProductName').value;
-    const description = document.getElementById('editProductDescription').value;
-    const price = parseFloat(document.getElementById('editProductPrice').value);
-    const stock = parseInt(document.getElementById('editProductStock').value);
-    const category = document.getElementById('editProductCategory').value;
-    
-    // Lấy size đã chọn
-    const selectedSizes = [];
-    document.querySelectorAll('.edit-size-options input[type="checkbox"]:checked').forEach(checkbox => {
-        selectedSizes.push(checkbox.value);
-    });
-    
-    // Lấy màu sắc đã chọn
-    const selectedColors = [];
-    document.querySelectorAll('.edit-color-options input[type="checkbox"]:checked').forEach(checkbox => {
-        selectedColors.push(checkbox.value);
-    });
-    
-    // Kiểm tra dữ liệu
-    if (!name || !description || isNaN(price) || isNaN(stock) || !category) {
-        showAlert('Please fill in all required fields', 'warning');
-        return;
-    }
-    
-    if (selectedSizes.length === 0) {
-        showAlert('Please select at least one size', 'warning');
-        return;
-    }
-    
-    if (selectedColors.length === 0) {
-        showAlert('Please select at least one color', 'warning');
-        return;
-    }
-    
-    // Tạo đối tượng sản phẩm
-    const productData = {
-        name: name,
-        description: description,
-        price: price,
-        stock: stock,
-        category_id: category,
-        size: selectedSizes,
-        color: selectedColors
-    };
-    
-    try {
-        const response = await fetch(`/admin/products/${productId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(productData)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to update product');
-        }
-        
-        // Xử lý upload hình ảnh (nếu có)
-        const imageInput = document.getElementById('editProductImage');
-        if (imageInput.files.length > 0) {
-            await uploadProductImage(productId, imageInput.files[0]);
-        }
-        
-        // Hiển thị thông báo thành công
-        showAlert('Product updated successfully', 'success');
-        
-        // Đóng modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('editProductModal'));
-        modal.hide();
-        
-        // Tải lại danh sách sản phẩm
-        loadProducts();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('Failed to update product', 'danger');
-    }
+    showAlert('Only sellers can update products', 'warning');
+    return;
 }
 
 // Upload hình ảnh sản phẩm
 async function uploadProductImage(productId, file) {
     const token = localStorage.getItem('accessToken');
-    
+
     const formData = new FormData();
     formData.append('image', file);
-    
+
     try {
         const response = await fetch(`/admin/products/${productId}/image`, {
             method: 'POST',
@@ -827,11 +646,11 @@ async function uploadProductImage(productId, file) {
             },
             body: formData
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to upload product image');
         }
-        
+
     } catch (error) {
         console.error('Error:', error);
         showAlert('Failed to upload product image', 'warning');
@@ -842,15 +661,15 @@ async function uploadProductImage(productId, file) {
 function createPagination(currentPage, totalPages, paginationElementId, loadFunction) {
     const paginationElement = document.getElementById(paginationElementId);
     paginationElement.innerHTML = '';
-    
+
     if (totalPages <= 1) {
         return;
     }
-    
+
     // Nút Previous
     const prevLi = document.createElement('li');
     prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-    
+
     const prevLink = document.createElement('a');
     prevLink.className = 'page-link';
     prevLink.href = '#';
@@ -861,18 +680,18 @@ function createPagination(currentPage, totalPages, paginationElementId, loadFunc
             loadFunction(currentPage - 1);
         }
     });
-    
+
     prevLi.appendChild(prevLink);
     paginationElement.appendChild(prevLi);
-    
+
     // Các nút số trang
     const startPage = Math.max(1, currentPage - 2);
     const endPage = Math.min(totalPages, startPage + 4);
-    
+
     for (let i = startPage; i <= endPage; i++) {
         const pageLi = document.createElement('li');
         pageLi.className = `page-item ${currentPage === i ? 'active' : ''}`;
-        
+
         const pageLink = document.createElement('a');
         pageLink.className = 'page-link';
         pageLink.href = '#';
@@ -881,15 +700,15 @@ function createPagination(currentPage, totalPages, paginationElementId, loadFunc
             e.preventDefault();
             loadFunction(i);
         });
-        
+
         pageLi.appendChild(pageLink);
         paginationElement.appendChild(pageLi);
     }
-    
+
     // Nút Next
     const nextLi = document.createElement('li');
     nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-    
+
     const nextLink = document.createElement('a');
     nextLink.className = 'page-link';
     nextLink.href = '#';
@@ -900,7 +719,7 @@ function createPagination(currentPage, totalPages, paginationElementId, loadFunc
             loadFunction(currentPage + 1);
         }
     });
-    
+
     nextLi.appendChild(nextLink);
     paginationElement.appendChild(nextLi);
 }
@@ -947,7 +766,7 @@ function formatCurrencyCompact(amount) {
 function logout() {
     // Xóa token
     localStorage.removeItem('accessToken');
-    
+
     // Chuyển hướng về trang đăng nhập
     window.location.href = '/login.html';
 }
@@ -960,14 +779,14 @@ function showAlert(message, type = 'info') {
     alertElement.style.top = '20px';
     alertElement.style.right = '20px';
     alertElement.style.zIndex = '9999';
-    
+
     alertElement.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
-    
+
     document.body.appendChild(alertElement);
-    
+
     // Tự động ẩn alert sau 5 giây
     setTimeout(() => {
         alertElement.classList.remove('show');

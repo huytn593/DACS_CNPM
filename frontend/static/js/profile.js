@@ -167,7 +167,7 @@ async function loadOrders() {
 // Display user orders
 function displayOrders(orders) {
     const ordersListElement = document.getElementById('ordersList');
-    
+
     if (!orders || orders.length === 0) {
         ordersListElement.innerHTML = `
             <tr>
@@ -179,16 +179,16 @@ function displayOrders(orders) {
         `;
         return;
     }
-    
+
     // Sort orders by date, newest first
     orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
+
     let ordersHtml = '';
-    
+
     orders.forEach(order => {
         const orderDate = new Date(order.created_at).toLocaleDateString();
         const statusBadge = getStatusBadge(order.status);
-        
+
         ordersHtml += `
             <tr>
                 <td>#${order.order_number || order.id}</td>
@@ -203,25 +203,25 @@ function displayOrders(orders) {
             </tr>
         `;
     });
-    
+
     ordersListElement.innerHTML = ordersHtml;
 }
 
 // Load wishlist items
 async function loadWishlist() {
     const token = localStorage.getItem('accessToken');
-    
+
     try {
         const response = await fetch('/api/wishlist', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to load wishlist');
         }
-        
+
         const wishlist = await response.json();
         displayWishlist(wishlist);
     } catch (error) {
@@ -237,7 +237,7 @@ async function loadWishlist() {
 // Display wishlist items
 function displayWishlist(wishlist) {
     const wishlistElement = document.getElementById('wishlistItems');
-    
+
     if (!wishlist || !wishlist.items || wishlist.items.length === 0) {
         wishlistElement.innerHTML = `
             <div class="col-12 text-center py-4">
@@ -248,12 +248,12 @@ function displayWishlist(wishlist) {
         `;
         return;
     }
-    
+
     let wishlistHtml = '';
-    
+
     wishlist.items.forEach(item => {
         const product = item.product;
-        
+
         wishlistHtml += `
             <div class="col-md-4 col-lg-3 mb-4">
                 <div class="card h-100">
@@ -274,9 +274,9 @@ function displayWishlist(wishlist) {
             </div>
         `;
     });
-    
+
     wishlistElement.innerHTML = wishlistHtml;
-    
+
     // Add event listeners for wishlist actions
     addWishlistEventListeners();
 }
@@ -290,7 +290,7 @@ function addWishlistEventListeners() {
             await removeFromWishlist(productId);
         });
     });
-    
+
     // Add to cart from wishlist
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', async () => {
@@ -303,7 +303,7 @@ function addWishlistEventListeners() {
 // Remove product from wishlist
 async function removeFromWishlist(productId) {
     const token = localStorage.getItem('accessToken');
-    
+
     try {
         const response = await fetch(`/api/wishlist/item/${productId}`, {
             method: 'DELETE',
@@ -311,14 +311,14 @@ async function removeFromWishlist(productId) {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to remove from wishlist');
         }
-        
+
         // Reload wishlist
         loadWishlist();
-        
+
         // Show success message
         showAlert('Item removed from wishlist', 'success');
     } catch (error) {
@@ -330,7 +330,7 @@ async function removeFromWishlist(productId) {
 // Add wishlist item to cart
 async function addToCartFromWishlist(productId) {
     const token = localStorage.getItem('accessToken');
-    
+
     try {
         const response = await fetch('/api/cart/items', {
             method: 'POST',
@@ -343,14 +343,14 @@ async function addToCartFromWishlist(productId) {
                 quantity: 1
             })
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to add to cart');
         }
-        
+
         // Show success message
         showAlert('Item added to cart', 'success');
-        
+
         // Update cart count
         updateCartCount();
     } catch (error) {
@@ -366,39 +366,39 @@ function setupFormListeners() {
         e.preventDefault();
         await updateProfile();
     });
-    
+
     // Shipping address
     document.getElementById('editShippingBtn').addEventListener('click', () => {
         document.getElementById('shippingAddressDisplay').style.display = 'none';
         document.getElementById('shippingAddressForm').style.display = 'block';
     });
-    
+
     document.getElementById('cancelShippingBtn').addEventListener('click', () => {
         document.getElementById('shippingAddressForm').style.display = 'none';
         document.getElementById('shippingAddressDisplay').style.display = 'block';
     });
-    
+
     document.getElementById('shippingForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await updateShippingAddress();
     });
-    
+
     // Billing address
     document.getElementById('editBillingBtn').addEventListener('click', () => {
         document.getElementById('billingAddressDisplay').style.display = 'none';
         document.getElementById('billingAddressForm').style.display = 'block';
     });
-    
+
     document.getElementById('cancelBillingBtn').addEventListener('click', () => {
         document.getElementById('billingAddressForm').style.display = 'none';
         document.getElementById('billingAddressDisplay').style.display = 'block';
     });
-    
+
     document.getElementById('billingForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await updateBillingAddress();
     });
-    
+
     // Same as shipping checkbox
     document.getElementById('sameAsShipping').addEventListener('change', function() {
         if (this.checked) {
@@ -418,7 +418,7 @@ function setupFormListeners() {
 // Update user profile
 async function updateProfile() {
     const token = localStorage.getItem('accessToken');
-    
+
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
     const displayName = document.getElementById('displayName').value;
@@ -427,19 +427,19 @@ async function updateProfile() {
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
-    
+
     // Basic validation
     if (!firstName || !lastName || !displayName || !email) {
         showAlert('Please fill in all required fields', 'warning');
         return;
     }
-    
+
     // Password validation
     if (newPassword && newPassword !== confirmPassword) {
         showAlert('New passwords do not match', 'warning');
         return;
     }
-    
+
     // Prepare profile data
     const profileData = {
         first_name: firstName,
@@ -448,13 +448,13 @@ async function updateProfile() {
         email: email,
         phone: phoneNumber
     };
-    
+
     // Add password data if a new password is set
     if (newPassword) {
         profileData.current_password = currentPassword;
         profileData.new_password = newPassword;
     }
-    
+
     try {
         const response = await fetch('/api/users/profile', {
             method: 'PUT',
@@ -464,20 +464,20 @@ async function updateProfile() {
             },
             body: JSON.stringify(profileData)
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.detail || 'Failed to update profile');
         }
-        
+
         // Clear password fields
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
-        
+
         // Show success message
         showAlert('Profile updated successfully', 'success');
-        
+
         // Reload user profile
         loadUserProfile();
     } catch (error) {
@@ -489,7 +489,7 @@ async function updateProfile() {
 // Update shipping address
 async function updateShippingAddress() {
     const token = localStorage.getItem('accessToken');
-    
+
     const shippingAddress = {
         full_name: document.getElementById('shippingFullName').value,
         address: document.getElementById('shippingAddressLine1').value,
@@ -500,7 +500,7 @@ async function updateShippingAddress() {
         country: document.getElementById('shippingCountryInput').value,
         phone: document.getElementById('shippingPhoneInput').value
     };
-    
+
     try {
         const response = await fetch('/api/users/address/shipping', {
             method: 'PUT',
@@ -510,18 +510,18 @@ async function updateShippingAddress() {
             },
             body: JSON.stringify(shippingAddress)
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to update shipping address');
         }
-        
+
         // Hide form and show updated address
         document.getElementById('shippingAddressForm').style.display = 'none';
         document.getElementById('shippingAddressDisplay').style.display = 'block';
-        
+
         // Show success message
         showAlert('Shipping address updated successfully', 'success');
-        
+
         // Reload user profile
         loadUserProfile();
     } catch (error) {
@@ -533,7 +533,7 @@ async function updateShippingAddress() {
 // Update billing address
 async function updateBillingAddress() {
     const token = localStorage.getItem('accessToken');
-    
+
     const billingAddress = {
         full_name: document.getElementById('billingFullName').value,
         address: document.getElementById('billingAddressLine1').value,
@@ -544,7 +544,7 @@ async function updateBillingAddress() {
         country: document.getElementById('billingCountryInput').value,
         phone: document.getElementById('billingPhoneInput').value
     };
-    
+
     try {
         const response = await fetch('/api/users/address/billing', {
             method: 'PUT',
@@ -554,18 +554,18 @@ async function updateBillingAddress() {
             },
             body: JSON.stringify(billingAddress)
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to update billing address');
         }
-        
+
         // Hide form and show updated address
         document.getElementById('billingAddressForm').style.display = 'none';
         document.getElementById('billingAddressDisplay').style.display = 'block';
-        
+
         // Show success message
         showAlert('Billing address updated successfully', 'success');
-        
+
         // Reload user profile
         loadUserProfile();
     } catch (error) {
@@ -578,13 +578,13 @@ async function updateBillingAddress() {
 function getStatusBadge(status) {
     const statusLower = status.toLowerCase();
     let badgeClass = 'bg-secondary';
-    
+
     if (statusLower === 'pending') badgeClass = 'bg-warning text-dark';
     else if (statusLower === 'processing') badgeClass = 'bg-info';
     else if (statusLower === 'shipped') badgeClass = 'bg-primary';
     else if (statusLower === 'delivered') badgeClass = 'bg-success';
     else if (statusLower === 'cancelled') badgeClass = 'bg-danger';
-    
+
     return `<span class="badge ${badgeClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
 }
 
@@ -603,14 +603,14 @@ function showAlert(message, type = 'info') {
     alertContainer.style.top = '20px';
     alertContainer.style.right = '20px';
     alertContainer.style.zIndex = '9999';
-    
+
     alertContainer.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
-    
+
     document.body.appendChild(alertContainer);
-    
+
     // Auto dismiss after 5 seconds
     setTimeout(() => {
         const alert = bootstrap.Alert.getOrCreateInstance(alertContainer);
