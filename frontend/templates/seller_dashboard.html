@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - Fashion Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h5 class="text-white">Fashion Store</h5>
+                        <p class="text-muted">Seller Dashboard</p>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard" data-bs-toggle="tab">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                                            class="nav-link" href="#products" data-bs-toggle="tab">
+                                <i class="fas fa-box me-2"></i>
+                                My Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#add-product" data-bs-toggle="tab">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Add Product
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#orders" data-bs-toggle="tab">
+                                <i class="fas fa-shopping-bag me-2"></i>
+                                Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#reports" data-bs-toggle="tab">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Reports
+                            </a>
+                        </li>
+                        <li class="nav-item mt-5">
+                            <a class="nav-link text-danger" href="/" id="backToStore">
+                                <i class="fas fa-store me-2"></i>
+                                Back to Store
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" href="#" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2" id="pageTitle">Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i> <span id="userName">Seller</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                                <li><a class="dropdown-item" href="/profile.html">My Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" id="logoutBtnTop">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="dashboardContent">
+                    <!-- Dashboard Overview -->
+                    <div class="tab-pane fade show active" id="dashboard">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-primary">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title text-muted">Products</h6>
+                                                <h3 class="card-text" id="productCount">0</h3>
+                                            </div>
+                                            <div class="bg-primary rounded-circle p-3">
+                                                <i class="fas fa-box fa-2x text-white"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title text-muted">Orders</h6>
+                                                <h3 class="card-text" id="orderCount">0</h3>
+                                            </div>
+                                            <div class="bg-success rounded-circle p-3">
+                                                <i class="fas fa-shopping-bag fa-2x text-white"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-info">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title text-muted">Revenue</h6>
+                                                <h3 class="card-text" id="totalRevenue">0 ₫</h3>
+                                            </div>
+                                            <div class="bg-info rounded-circle p-3">
+                                                <i class="fas fa-money-bill-wave fa-2x text-white"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Orders -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recent Orders</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Order ID</th>
+                                                <th>Date</th>
+                                                <th>Customer</th>
+                                                <th>Status</th>
+                                                <th>Amount</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentOrdersList">
+                                            <tr>
+                                                <td colspan="6" class="text-center">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer text-center">
+                                <a href="#orders" class="btn btn-sm btn-outline-primary" data-bs-toggle="tab">View All Orders</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Tab -->
+                    <div class="tab-pane fade" id="products">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4>My Products</h4>
+                            <a href="#add-product" class="btn btn-primary" data-bs-toggle="tab">
+                                <i class="fas fa-plus me-2"></i> Add New Product
+                            </a>
+                        </div>
+
+                        <!-- Search and Filter -->
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="productSearchInput" placeholder="Search products...">
+                                    <button class="btn btn-outline-secondary" type="button" id="productSearchBtn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="productCategoryFilter">
+                                    <option value="">All Categories</option>
+                                    <!-- Categories will be loaded dynamically -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Products Table -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Image</th>
+                                                <th>Name</th>
+                                                <th>Category</th>
+                                                <th>Price</th>
+                                                <th>Stock</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="productsList">
+                                            <tr>
+                                                <td colspan="7" class="text-center">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav aria-label="Products pagination" class="mt-4">
+                                    <ul class="pagination justify-content-center" id="productsPagination">
+                                        <!-- Pagination will be loaded dynamically -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Product Tab -->
+                    <div class="tab-pane fade" id="add-product">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Add New Product</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="addProductForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="productName" class="form-label">Product Name</label>
+                                            <input type="text" class="form-control" id="productName" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="productCategory" class="form-label">Category</label>
+                                            <select class="form-select" id="productCategory" required>
+                                                <option value="" selected disabled>Select a category</option>
+                                                <!-- Categories will be loaded dynamically -->
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="productDescription" class="form-label">Description</label>
+                                        <textarea class="form-control" id="productDescription" rows="4" required></textarea>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="productPrice" class="form-label">Price (VND)</label>
+                                            <input type="number" class="form-control" id="productPrice" min="0" step="1000" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="productStock" class="form-label">Stock Quantity</label>
+                                            <input type="number" class="form-control" id="productStock" min="0" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="productImage" class="form-label">Image</label>
+                                            <input type="file" class="form-control" id="productImage" accept="image/*">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Available Sizes</label>
+                                            <div class="size-options">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="sizeS" value="S">
+                                                    <label class="form-check-label" for="sizeS">S</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="sizeM" value="M">
+                                                    <label class="form-check-label" for="sizeM">M</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="sizeL" value="L">
+                                                    <label class="form-check-label" for="sizeL">L</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="sizeXL" value="XL">
+                                                    <label class="form-check-label" for="sizeXL">XL</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="sizeXXL" value="XXL">
+                                                    <label class="form-check-label" for="sizeXXL">XXL</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Available Colors</label>
+                                            <div class="color-options">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="colorBlack" value="Black">
+                                                    <label class="form-check-label" for="colorBlack">Black</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="colorWhite" value="White">
+                                                    <label class="form-check-label" for="colorWhite">White</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="colorRed" value="Red">
+                                                    <label class="form-check-label" for="colorRed">Red</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="colorBlue" value="Blue">
+                                                    <label class="form-check-label" for="colorBlue">Blue</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" id="colorGreen" value="Green">
+                                                    <label class="form-check-label" for="colorGreen">Green</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                        <button type="button" class="btn btn-outline-secondary me-md-2" id="resetProductFormBtn">Reset</button>
+                                        <button type="submit" class="btn btn-primary">Add Product</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div class="tab-pane fade" id="orders">
+                        <h4 class="mb-4">Orders Management</h4>
+
+                        <!-- Filter and Search -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <select class="form-select" id="orderStatusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" class="form-control" id="orderDateFilter">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="orderSearchInput" placeholder="Search by Order ID or Customer">
+                                    <button class="btn btn-outline-secondary" type="button" id="orderSearchBtn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Orders Table -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Order ID</th>
+                                                <th>Date</th>
+                                                <th>Customer</th>
+                                                <th>Products</th>
+                                                <th>Total</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ordersList">
+                                            <tr>
+                                                <td colspan="7" class="text-center">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav aria-label="Orders pagination" class="mt-4">
+                                    <ul class="pagination justify-content-center" id="ordersPagination">
+                                        <!-- Pagination will be loaded dynamically -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Tab -->
+                    <div class="tab-pane fade" id="reports">
+                        <h4 class="mb-4">Sales Reports</h4>
+
+                        <!-- Date Range Selector -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label for="reportStartDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="reportStartDate">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reportEndDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="reportEndDate">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-primary w-100" id="generateReportBtn">Generate Report</button>
+                            </div>
+                        </div>
+
+                        <!-- Report Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Total Sales</h6>
+                                        <h3 id="reportTotalSales">0 ₫</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Orders</h6>
+                                        <h3 id="reportOrderCount">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Products Sold</h6>
+                                        <h3 id="reportProductsSold">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Avg. Order Value</h6>
+                                        <h3 id="reportAvgOrderValue">0 ₫</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sales Chart -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Sales Trend</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="salesChart" height="300"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Top Products -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Top Selling Products</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Category</th>
+                                                <th>Units Sold</th>
+                                                <th>Revenue</th>
+                                                <th>Avg. Rating</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topProductsList">
+                                            <tr>
+                                                <td colspan="5" class="text-center">No data available</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <input type="hidden" id="editProductId">
+                        <!-- Modal form fields will be similar to add product form -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveProductChangesBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderDetailsContent">
+                    <!-- Order details will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="updateOrderStatusBtn">Update Status</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/seller_dashboard.js"></script>
+</body>
+</html>
