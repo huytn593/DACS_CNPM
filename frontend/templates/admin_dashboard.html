@@ -7,7 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css">
-    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="stylesheet" href="/frontend/static/css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
 <body>
     <div class="container-fluid">
@@ -19,7 +20,7 @@
                         <h4>Fashion Store</h4>
                         <div class="small">Admin Panel</div>
                     </div>
-                    
+
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link active" href="#dashboard" data-bs-toggle="tab">
@@ -64,7 +65,7 @@
                             </a>
                         </li>
                     </ul>
-                    
+
                     <hr>
                     <div class="px-3">
                         <button id="logoutBtn" class="btn btn-outline-light w-100">
@@ -73,7 +74,7 @@
                     </div>
                 </div>
             </nav>
-            
+
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -85,7 +86,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="tab-content">
                     <!-- Dashboard Overview -->
                     <div class="tab-pane fade show active" id="dashboard">
@@ -108,7 +109,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-3 mb-3">
                                 <div class="card bg-success text-white h-100">
                                     <div class="card-body py-4">
@@ -126,7 +127,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-3 mb-3">
                                 <div class="card bg-warning h-100">
                                     <div class="card-body py-4">
@@ -144,7 +145,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-3 mb-3">
                                 <div class="card bg-info text-white h-100">
                                     <div class="card-body py-4">
@@ -163,20 +164,29 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Charts -->
                         <div class="row mb-4">
                             <div class="col-md-8 mb-3">
                                 <div class="card">
-                                    <div class="card-header">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
                                         <h5 class="card-title">Revenue Overview</h5>
+                                        <div class="form-group mb-0">
+                                            <label for="reportDataRange"></label>
+                                            <select id="reportDataRange" class="form-select form-select-sm">
+                                                <option value="day">Today</option>
+                                                <option value="week" selected>This Week</option>
+                                                <option value="month">This Month</option>
+                                                <option value="year">This Year</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="card-body">
                                         <canvas id="revenueChart" height="250"></canvas>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-4 mb-3">
                                 <div class="card">
                                     <div class="card-header">
@@ -188,7 +198,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Recent Orders -->
                         <div class="card mb-4">
                             <div class="card-header d-flex justify-content-between align-items-center">
@@ -222,33 +232,33 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Products Management -->
                     <div class="tab-pane fade" id="products">
                         <div class="card mb-4">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="card-title">All Products</h5>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                                    <i class="fas fa-plus me-1"></i> Add Product
-                                </button>
+                                <!-- Removed Add Product button as only sellers can add products -->
                             </div>
                             <div class="card-body">
                                 <!-- Filter and Search -->
                                 <div class="row mb-3">
                                     <div class="col-md-6 mb-2">
                                         <div class="input-group">
-                                            <input type="text" class="form-control" id="productSearchInput" placeholder="Search products...">
+                                            <label for="productSearchInput"></label><input type="text" class="form-control" id="productSearchInput" placeholder="Search products...">
                                             <button class="btn btn-outline-secondary" type="button" id="productSearchBtn">
                                                 <i class="fas fa-search"></i>
                                             </button>
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-2">
+                                        <label for="productCategoryFilter"></label>
                                         <select class="form-select" id="productCategoryFilter">
                                             <option value="">All Categories</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3 mb-2">
+                                        <label for="productStatusFilter"></label>
                                         <select class="form-select" id="productStatusFilter">
                                             <option value="">All Status</option>
                                             <option value="in_stock">In Stock</option>
@@ -257,13 +267,13 @@
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Products Table -->
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover">
                                         <thead>
                                             <tr>
-                                                <th width="60">Image</th>
+                                                <th style="width: 60px;">Image</th>
                                                 <th>Name</th>
                                                 <th>Category</th>
                                                 <th>Price</th>
@@ -283,7 +293,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 <!-- Pagination -->
                                 <nav aria-label="Products pagination">
                                     <ul class="pagination justify-content-center" id="productsPagination">
@@ -292,7 +302,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Categories Management -->
                     <div class="tab-pane fade" id="categories">
                         <div class="row">
@@ -320,7 +330,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-8 mb-4">
                                 <div class="card">
                                     <div class="card-header">
@@ -353,7 +363,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Orders Management -->
                     <div class="tab-pane fade" id="orders">
                         <div class="card mb-4">
@@ -365,6 +375,7 @@
                                 <div class="row mb-3">
                                     <div class="col-md-4 mb-2">
                                         <div class="input-group">
+                                            <label for="orderSearchInput"></label>
                                             <input type="text" class="form-control" id="orderSearchInput" placeholder="Search by ID or customer...">
                                             <button class="btn btn-outline-secondary" type="button" id="orderSearchBtn">
                                                 <i class="fas fa-search"></i>
@@ -372,6 +383,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-2">
+                                        <label for="orderStatusFilter"></label>
                                         <select class="form-select" id="orderStatusFilter">
                                             <option value="">All Status</option>
                                             <option value="pending">Pending</option>
@@ -384,13 +396,15 @@
                                     <div class="col-md-5 mb-2">
                                         <div class="input-group">
                                             <span class="input-group-text">Date Range</span>
+                                            <label for="orderStartDate"></label>
                                             <input type="date" class="form-control" id="orderStartDate">
                                             <span class="input-group-text">to</span>
+                                            <label for="orderEndDate"></label>
                                             <input type="date" class="form-control" id="orderEndDate">
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Orders Table -->
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover">
@@ -416,7 +430,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 <!-- Pagination -->
                                 <nav aria-label="Orders pagination">
                                     <ul class="pagination justify-content-center" id="ordersPagination">
@@ -425,7 +439,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Users Management -->
                     <div class="tab-pane fade" id="users">
                         <div class="card mb-4">
@@ -440,6 +454,7 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6 mb-2">
                                         <div class="input-group">
+                                            <label for="userSearchInput"></label>
                                             <input type="text" class="form-control" id="userSearchInput" placeholder="Search users...">
                                             <button class="btn btn-outline-secondary" type="button" id="userSearchBtn">
                                                 <i class="fas fa-search"></i>
@@ -447,6 +462,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-2">
+                                        <label for="userRoleFilter"></label>
                                         <select class="form-select" id="userRoleFilter">
                                             <option value="">All Roles</option>
                                             <option value="user">User</option>
@@ -455,6 +471,7 @@
                                         </select>
                                     </div>
                                     <div class="col-md-3 mb-2">
+                                        <label for="userStatusFilter"></label>
                                         <select class="form-select" id="userStatusFilter">
                                             <option value="">All Status</option>
                                             <option value="active">Active</option>
@@ -463,7 +480,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Users Table -->
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover">
@@ -489,7 +506,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 <!-- Pagination -->
                                 <nav aria-label="Users pagination">
                                     <ul class="pagination justify-content-center" id="usersPagination">
@@ -498,7 +515,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Reports -->
                     <div class="tab-pane fade" id="reports">
                         <div class="row mb-4">
@@ -522,9 +539,11 @@
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="reportDateRange" class="form-label">Date Range</label>
-                                                    <div class="input-group">
+                                                    <div class="input-group" id="reportDateRange">
+                                                        <label for="reportStartDate"></label>
                                                         <input type="date" class="form-control" id="reportStartDate">
                                                         <span class="input-group-text">to</span>
+                                                        <label for="reportEndDate"></label>
                                                         <input type="date" class="form-control" id="reportEndDate">
                                                     </div>
                                                 </div>
@@ -539,7 +558,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div id="reportContainer" style="display: none;">
                             <div class="card mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -561,7 +580,6 @@
                             </div>
                         </div>
                     </div>
-                    
                     <!-- Settings -->
                     <div class="tab-pane fade" id="settings">
                         <div class="row">
@@ -601,7 +619,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6 mb-4">
                                 <div class="card">
                                     <div class="card-header">
@@ -642,7 +660,7 @@
             </main>
         </div>
     </div>
-    
+
     <!-- Add Product Modal -->
     <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -785,7 +803,7 @@
                             <div class="mb-3">
                                 <label for="editProductImage" class="form-label">Product Image</label>
                                 <div class="mb-2">
-                                    <img id="currentProductImage" src="/static/images/product-placeholder.jpg" class="img-thumbnail" style="height: 100px; width: auto;">
+                                    <img id="currentProductImage" src="/frontend/static/images/" class="img-thumbnail" style="height: 100px; width: auto;" alt="sửa">
                                 </div>
                                 <input type="file" class="form-control" id="editProductImage" accept="image/*">
                             </div>
@@ -920,10 +938,172 @@
         </div>
     </div>
 </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/frontend/static/js/common.js"></script>
+    <script src="/frontend/static/js/admin.js"></script>
+    <script>
+    // Script để xử lý biểu đồ doanh thu
+    let revenueChart;
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="/static/js/admin.js"></script>
+    async function fetchChartData() {
+        try {
+            const dateRange = document.getElementById('reportDataRange').value;
+            const token = localStorage.getItem('access_token');
 
+
+            if (!token) {
+                console.error('No authentication token found');
+                return null;
+            }
+
+            // Lấy dữ liệu từ API
+            const response = await fetch(`/admin/stats/sales?date_range=${dateRange}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching chart data:', error);
+            // Nếu API chưa sẵn sàng, sử dụng dữ liệu mẫu
+            return getDemoChartData(dateRange);
+        }
+    }
+
+    function getDemoChartData(range = 'week') {
+        // Dữ liệu mẫu để kiểm tra biểu đồ
+        const demoData = {
+            day: {
+                labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
+                data: [150000, 360000, 720000, 1050000, 980000, 1250000]
+            },
+            week: {
+                labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'],
+                data: [3150000, 2980000, 3720000, 4150000, 5280000, 6350000, 4820000]
+            },
+            month: {
+                labels: ['1', '5', '10', '15', '20', '25', '30'],
+                data: [15150000, 18720000, 21050000, 19280000, 22150000, 20720000, 23050000]
+            },
+            year: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+                         'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                data: [55150000, 62980000, 71720000, 68050000, 74280000, 82350000,
+                       79820000, 85150000, 87720000, 89050000, 95280000, 98350000]
+            }
+        };
+
+        return {
+            date_range: range,
+            total_sales: demoData[range].data.reduce((sum, val) => sum + val, 0),
+            chart_data: demoData[range].labels.map((label, index) => ({
+                label: label,
+                value: demoData[range].data[index]
+            })),
+            comparison_with_previous: 15.2 // Giá trị mẫu cho phần trăm tăng trưởng
+        };
+    }
+
+    async function renderRevenueChart() {
+        const chartData = await fetchChartData();
+        if (!chartData) return;
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+
+        // Hủy biểu đồ cũ nếu tồn tại
+        if (revenueChart) {
+            revenueChart.destroy();
+        }
+
+        // Chuẩn bị dữ liệu
+        const labels = chartData.chart_data.map(item => item.label);
+        const data = chartData.chart_data.map(item => item.value);
+
+        // Tạo biểu đồ mới
+        revenueChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Revenue (VND)',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return formatCurrency(context.raw);
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Hiển thị tổng doanh thu
+        document.getElementById('totalRevenue').textContent = formatCurrency(chartData.total_sales);
+
+        // Hiển thị phần trăm tăng trưởng nếu có
+        if (chartData.comparison_with_previous !== null) {
+            const comparisonElement = document.getElementById('comparisonInfo');
+            if (comparisonElement) {
+                const percentChange = chartData.comparison_with_previous.toFixed(2);
+                const trend = percentChange >= 0 ? 'tăng' : 'giảm';
+                comparisonElement.innerHTML =
+                    `Doanh thu ${trend} <strong>${Math.abs(percentChange)}%</strong> so với kỳ trước`;
+                comparisonElement.className = percentChange >= 0 ? 'text-success' : 'text-danger';
+            }
+        }
+    }
+
+    // Format tiền tệ VND
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+
+    // Xử lý sự kiện thay đổi khoảng thời gian
+    document.addEventListener('DOMContentLoaded', function() {
+        const reportDataRange = document.getElementById('reportDataRange');
+        if (reportDataRange) {
+            reportDataRange.addEventListener('change', renderRevenueChart);
+            // Khởi tạo biểu đồ khi trang tải xong
+            renderRevenueChart();
+        }
+    });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/frontend/static/js/admin.js"></script>
 </body>
 </html>

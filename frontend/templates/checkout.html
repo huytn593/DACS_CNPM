@@ -6,7 +6,7 @@
     <title>Checkout - Fashion Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/frontend/static/css/style.css">
 </head>
 <body>
     <!-- Header -->
@@ -33,6 +33,7 @@
                             </li>
                         </ul>
                         <form class="d-flex me-2" id="searchForm">
+                            <label for="searchInput"></label>
                             <input class="form-control me-2" type="search" id="searchInput" placeholder="Search products...">
                             <button class="btn btn-outline-light" type="submit">
                                 <i class="fas fa-search"></i>
@@ -40,14 +41,14 @@
                         </form>
                         <ul class="navbar-nav">
                             <li class="nav-item">
-                                <a class="nav-link" href="/cart.html">
+                                <a class="nav-link" href="cart.html">
                                     <i class="fas fa-shopping-cart"></i>
                                     <span class="badge bg-danger" id="cartCount">0</span>
                                 </a>
                             </li>
                             <li class="nav-item dropdown" id="userDropdown">
                                 <!-- Will be replaced with user info or login link -->
-                                <a class="nav-link" href="/login.html">
+                                <a class="nav-link" href="login.html">
                                     <i class="fas fa-user"></i> Login
                                 </a>
                             </li>
@@ -62,12 +63,12 @@
     <section class="py-5">
         <div class="container">
             <h2 class="mb-4">Checkout</h2>
-            
+
             <!-- Progress Bar -->
             <div class="progress mb-5" style="height: 3px;">
                 <div id="checkoutProgress" class="progress-bar" role="progressbar" style="width: 33%;" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
-            
+
             <div class="row mb-4">
                 <div class="col-12">
                     <ul class="nav nav-pills nav-justified checkout-steps mb-4">
@@ -92,7 +93,7 @@
                     </ul>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-lg-8">
                     <div class="tab-content" id="checkoutTabContent">
@@ -112,17 +113,17 @@
                                                 <input type="tel" class="form-control" id="phoneNumber" required>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="mb-3">
                                             <label for="emailAddress" class="form-label">Email Address</label>
                                             <input type="email" class="form-control" id="emailAddress" required>
                                         </div>
-                                        
+
                                         <div class="mb-3">
                                             <label for="address" class="form-label">Address</label>
                                             <input type="text" class="form-control" id="address" required>
                                         </div>
-                                        
+
                                         <div class="row mb-3">
                                             <div class="col-md-5">
                                                 <label for="city" class="form-label">City</label>
@@ -137,21 +138,21 @@
                                                 <input type="text" class="form-control" id="zipCode">
                                             </div>
                                         </div>
-                                        
+
                                         <div class="mb-3">
                                             <label for="shippingNotes" class="form-label">Order Notes (Optional)</label>
                                             <textarea class="form-control" id="shippingNotes" rows="3" placeholder="Special instructions for delivery"></textarea>
                                         </div>
-                                        
+
                                         <div class="form-check mb-4">
                                             <input class="form-check-input" type="checkbox" id="saveShippingInfo">
                                             <label class="form-check-label" for="saveShippingInfo">
                                                 Save this information for future orders
                                             </label>
                                         </div>
-                                        
+
                                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                            <a href="/cart.html" class="btn btn-outline-secondary me-md-2">
+                                            <a href="cart.html" class="btn btn-outline-secondary me-md-2">
                                                 <i class="fas fa-arrow-left me-1"></i> Back to Cart
                                             </a>
                                             <button type="submit" class="btn btn-primary">
@@ -162,7 +163,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Payment Method Tab -->
                         <div class="tab-pane fade" id="payment">
                             <div class="card">
@@ -177,13 +178,13 @@
                                                         <i class="fas fa-money-bill-wave me-2 text-success"></i>
                                                         Cash on Delivery
                                                     </span>
-                                                    <img src="/static/images/cod.png" height="30" alt="COD">
+                                                    <img src="/frontend/static/images/cash-on-delivery.png" height="30" alt="COD">
                                                 </label>
                                                 <div class="payment-description mt-2">
                                                     Pay with cash when your order is delivered.
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="form-check mb-3 p-3 border rounded">
                                                 <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" value="bank">
                                                 <label class="form-check-label d-flex justify-content-between align-items-center" for="bankTransfer">
@@ -191,13 +192,13 @@
                                                         <i class="fas fa-university me-2 text-primary"></i>
                                                         Bank Transfer
                                                     </span>
-                                                    <img src="/static/images/bank.png" height="30" alt="Bank Transfer">
+                                                    <img src="/frontend/static/images/" height="30" alt="Bank Transfer">
                                                 </label>
                                                 <div class="payment-description mt-2">
                                                     Make your payment directly into our bank account. Please use your Order ID as the payment reference.
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="form-check mb-3 p-3 border rounded">
                                                 <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="card">
                                                 <label class="form-check-label d-flex justify-content-between align-items-center" for="creditCard">
@@ -205,16 +206,14 @@
                                                         <i class="fas fa-credit-card me-2 text-info"></i>
                                                         Credit / Debit Card
                                                     </span>
-                                                    <div>
-                                                        <img src="/static/images/visa.png" height="30" alt="Visa">
-                                                        <img src="/static/images/mastercard.png" height="30" alt="Mastercard">
-                                                    </div>
+                                                        <img src="/frontend/static/images/Visa.png" height="30" alt="Visa">
+                                                        <img src="/frontend/static/images/Mastercard.png" height="30" alt="Mastercard">
                                                 </label>
                                                 <div class="payment-description mt-2">
                                                     Pay securely with your credit or debit card.
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="form-check mb-3 p-3 border rounded">
                                                 <input class="form-check-input" type="radio" name="paymentMethod" id="momo" value="momo">
                                                 <label class="form-check-label d-flex justify-content-between align-items-center" for="momo">
@@ -222,14 +221,14 @@
                                                         <i class="fas fa-wallet me-2 text-danger"></i>
                                                         MoMo Wallet
                                                     </span>
-                                                    <img src="/static/images/momo.png" height="30" alt="MoMo">
+                                                    <img src="/frontend/static/images/" height="30" alt="MoMo">
                                                 </label>
                                                 <div class="payment-description mt-2">
                                                     Pay using MoMo e-wallet.
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div id="cardPaymentDetails" class="mb-4" style="display: none;">
                                             <h5 class="mb-3">Card Details</h5>
                                             <div class="mb-3">
@@ -251,7 +250,7 @@
                                                 <input type="text" class="form-control" id="cardholderName">
                                             </div>
                                         </div>
-                                        
+
                                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                             <button type="button" class="btn btn-outline-secondary me-md-2" id="backToShippingBtn">
                                                 <i class="fas fa-arrow-left me-1"></i> Back to Shipping
@@ -264,13 +263,13 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Confirmation Tab -->
                         <div class="tab-pane fade" id="confirmation">
                             <div class="card">
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">Order Review</h4>
-                                    
+
                                     <div class="mb-4">
                                         <h5>Shipping Information</h5>
                                         <div class="card bg-light">
@@ -281,7 +280,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="mb-4">
                                         <h5>Payment Method</h5>
                                         <div class="card bg-light">
@@ -292,7 +291,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="mb-4">
                                         <h5>Order Items</h5>
                                         <div class="table-responsive">
@@ -311,14 +310,14 @@
                                             </table>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="form-check mb-4">
                                         <input class="form-check-input" type="checkbox" id="termsAgreement" required>
                                         <label class="form-check-label" for="termsAgreement">
                                             I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
                                         </label>
                                     </div>
-                                    
+
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                         <button type="button" class="btn btn-outline-secondary me-md-2" id="backToPaymentBtn">
                                             <i class="fas fa-arrow-left me-1"></i> Back to Payment
@@ -332,13 +331,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Order Summary -->
                 <div class="col-lg-4">
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title mb-4">Order Summary</h4>
-                            
+
                             <div id="orderSummary">
                                 <!-- Order summary will be filled dynamically -->
                                 <div class="text-center">
@@ -365,25 +364,25 @@
                 <div class="modal-body">
                     <h6>1. Introduction</h6>
                     <p>These Website Standard Terms and Conditions (these "Terms" or these "Website Standard Terms and Conditions") contained herein on this webpage, shall govern your use of this website.</p>
-                    
+
                     <h6>2. Intellectual Property Rights</h6>
                     <p>Other than the content you own, under these Terms, the Company and/or its licensors own all the intellectual property rights and materials contained in this Website.</p>
-                    
+
                     <h6>3. Restrictions</h6>
-                    <p>You are specifically restricted from all of the following:</p>
+                    <p>You are specifically restricted from the following:</p>
                     <ul>
                         <li>publishing any Website material in any other media;</li>
                         <li>selling, sublicensing and/or otherwise commercializing any Website material;</li>
                         <li>using this Website in any way that is or may be damaging to this Website;</li>
                         <li>using this Website in any way that impacts user access to this Website;</li>
                     </ul>
-                    
+
                     <h6>4. Your Content</h6>
                     <p>In these Website Standard Terms and Conditions, "Your Content" shall mean any audio, video text, images or other material you choose to display on this Website.</p>
-                    
+
                     <h6>5. No warranties</h6>
                     <p>This Website is provided "as is," with all faults, and the Company express no representations or warranties, of any kind related to this Website or the materials contained on this Website.</p>
-                    
+
                     <h6>6. Limitation of liability</h6>
                     <p>In no event shall the Company, nor any of its officers, directors and employees, shall be held liable for anything arising out of or in any way connected with your use of this Website.</p>
                 </div>
@@ -407,7 +406,7 @@
                     <p class="mb-2">Order ID: <span id="orderConfirmationId" class="fw-bold"></span></p>
                     <p class="text-muted mb-4">A confirmation email has been sent to your email address.</p>
                     <div class="d-grid gap-2">
-                        <a href="/orders.html" class="btn btn-primary">View Your Orders</a>
+                        <a href="orders.html" class="btn btn-primary">View Your Orders</a>
                         <a href="/" class="btn btn-outline-secondary">Continue Shopping</a>
                     </div>
                 </div>
@@ -451,7 +450,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/common.js"></script>
-    <script src="/static/js/checkout.js"></script>
+    <script src="/frontend/static/js/common.js"></script>
+    <script src="/frontend/static/js/checkout.js"></script>
 </body>
 </html>
