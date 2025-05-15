@@ -31,19 +31,20 @@
                                 Categories
                             </a>
                             <ul class="dropdown-menu" id="categoryDropdown" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="/products?category=all">All Categories</a></li>
+                                <li><a class="dropdown-item" href="/api/products?category=all">All Categories</a></li>
                                 <!-- Categories will be loaded dynamically -->
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/products?category=sale">Sale</a>
+                            <a class="nav-link" href="/api/products?category=sale">Sale</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/contact.html">Contact</a>
+                            <a class="nav-link" href="contact.html">Contact</a>
                         </li>
                     </ul>
                     <div class="d-flex align-items-center">
                         <form class="d-flex me-2" id="searchForm">
+                            <label for="searchInput"></label>
                             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="searchInput">
                             <button class="btn btn-outline-primary" type="submit">
                                 <i class="fas fa-search"></i>
@@ -74,7 +75,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="profile.html">My Account</a></li>
+                <li class="breadcrumb-item"><a href="account.html">My Account</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Order Details</li>
             </ol>
         </nav>
@@ -90,19 +91,19 @@
                         <h5 class="mb-0">My Account</h5>
                     </div>
                     <div class="list-group list-group-flush">
-                        <a href="profile.html" class="list-group-item list-group-item-action">
+                        <a href="account.html" class="list-group-item list-group-item-action">
                             <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                         </a>
-                        <a href="profile.html#orders" class="list-group-item list-group-item-action active">
+                        <a href="account.html#orders" class="list-group-item list-group-item-action active">
                             <i class="fas fa-shopping-bag me-2"></i> My Orders
                         </a>
-                        <a href="profile.html#wishlist" class="list-group-item list-group-item-action">
+                        <a href="wishlist.html" class="list-group-item list-group-item-action">
                             <i class="fas fa-heart me-2"></i> Wishlist
                         </a>
-                        <a href="profile.html#addresses" class="list-group-item list-group-item-action">
+                        <a href="account.html#addresses" class="list-group-item list-group-item-action">
                             <i class="fas fa-map-marker-alt me-2"></i> Addresses
                         </a>
-                        <a href="profile.html#profile" class="list-group-item list-group-item-action">
+                        <a href="account.html#profile" class="list-group-item list-group-item-action">
                             <i class="fas fa-user-edit me-2"></i> Account Details
                         </a>
                         <a href="#" id="logoutSidebarBtn" class="list-group-item list-group-item-action text-danger">
@@ -113,107 +114,172 @@
             </div>
 
             <div class="col-lg-9">
-                <div class="card">
+                <div class="card mb-4">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Order #<span id="orderNumber">Loading...</span></h5>
-                        <div id="orderStatusBadge" class="badge bg-warning text-dark">Processing</div>
+                        <h5 class="mb-0">Order #<span id="orderId">123456</span></h5>
+                        <span class="badge bg-success" id="orderStatus">Delivered</span>
                     </div>
                     <div class="card-body">
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h6 class="text-muted">Order Information</h6>
-                                <table class="table table-sm table-borderless">
-                                    <tr>
-                                        <td class="text-muted">Order Date:</td>
-                                        <td id="orderDate">Loading...</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-muted">Order Status:</td>
-                                        <td id="orderStatus">Loading...</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-muted">Payment Method:</td>
-                                        <td id="paymentMethod">Loading...</td>
-                                    </tr>
-                                </table>
+                                <h6 class="text-muted">Order Date</h6>
+                                <p id="orderDate">June 15, 2023</p>
                             </div>
                             <div class="col-md-6">
-                                <h6 class="text-muted">Shipping Address</h6>
-                                <address id="shippingAddress" class="mb-0">
-                                    Loading...
-                                </address>
+                                <h6 class="text-muted">Payment Method</h6>
+                                <p id="paymentMethod">Credit Card</p>
                             </div>
                         </div>
 
-                        <h6 class="text-muted mb-3">Ordered Items</h6>
-                        <div class="table-responsive mb-4">
-                            <table class="table table-bordered table-hover">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Shipping Address</h6>
+                                <p id="shippingAddress">
+                                    John Doe<br>
+                                    123 Main Street<br>
+                                    Apartment 4B<br>
+                                    New York, NY 10001<br>
+                                    United States
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Billing Address</h6>
+                                <p id="billingAddress">
+                                    John Doe<br>
+                                    123 Main Street<br>
+                                    Apartment 4B<br>
+                                    New York, NY 10001<br>
+                                    United States
+                                </p>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-3">Order Items</h6>
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th>Quantity</th>
-                                        <th>Size</th>
-                                        <th>Color</th>
-                                        <th>Total</th>
+                                        <th scope="col">Product</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col" class="text-end">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="orderItems">
+                                    <!-- Order items will be inserted here -->
                                     <tr>
-                                        <td colspan="6" class="text-center">Loading...</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/frontend/static/images/product-1.jpg" width="60" class="img-fluid rounded me-3" alt="Product">
+                                                <div>
+                                                    <h6 class="mb-0">Men's T-Shirt</h6>
+                                                    <small class="text-muted">Size: L, Color: Blue</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>$29.99</td>
+                                        <td>1</td>
+                                        <td class="text-end">$29.99</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="/frontend/static/images/product-2.jpg" width="60" class="img-fluid rounded me-3" alt="Product">
+                                                <div>
+                                                    <h6 class="mb-0">Running Shoes</h6>
+                                                    <small class="text-muted">Size: 10, Color: Black</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>$79.99</td>
+                                        <td>1</td>
+                                        <td class="text-end">$79.99</td>
                                     </tr>
                                 </tbody>
-                                <tfoot>
+                                <tfoot class="table-light">
                                     <tr>
-                                        <td colspan="5" class="text-end fw-bold">Subtotal:</td>
-                                        <td id="subtotal" class="fw-bold">₫0</td>
+                                        <td colspan="3" class="text-end">Subtotal:</td>
+                                        <td class="text-end" id="subtotal">$109.98</td>
                                     </tr>
                                     <tr>
-                                        <td colspan="5" class="text-end">Shipping Fee:</td>
-                                        <td id="shippingFee">₫0</td>
+                                        <td colspan="3" class="text-end">Shipping:</td>
+                                        <td class="text-end" id="shipping">$5.00</td>
                                     </tr>
                                     <tr>
-                                        <td colspan="5" class="text-end">Discount:</td>
-                                        <td id="discount">-₫0</td>
+                                        <td colspan="3" class="text-end">Discount:</td>
+                                        <td class="text-end text-danger" id="discount">-$10.00</td>
                                     </tr>
                                     <tr>
-                                        <td colspan="5" class="text-end fw-bold">Grand Total:</td>
-                                        <td id="grandTotal" class="fw-bold">₫0</td>
+                                        <td colspan="3" class="text-end fw-bold">Total:</td>
+                                        <td class="text-end fw-bold" id="total">$104.98</td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h6 class="text-muted mb-3">Order Timeline</h6>
-                                <div class="card border-light mb-4">
-                                    <div class="card-body p-0">
-                                        <ul class="timeline" id="orderTimeline">
-                                            <li class="timeline-item">
-                                                <div class="timeline-badge bg-primary"></div>
-                                                <div class="timeline-content">
-                                                    <div class="d-flex justify-content-between">
-                                                        <span class="fw-bold">Order Placed</span>
-                                                        <span class="text-muted small" id="orderCreatedDate">Loading...</span>
-                                                    </div>
-                                                    <p class="text-muted small mb-0">Your order has been placed successfully</p>
-                                                </div>
-                                            </li>
-                                            <!-- More timeline items will be added dynamically -->
-                                        </ul>
+                        <div class="mt-4">
+                            <h6 class="mb-3">Order Timeline</h6>
+                            <div class="timeline" id="orderTimeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-badge bg-success">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Order Delivered</h6>
+                                        <p class="text-muted">June 20, 2023, 2:15 PM</p>
+                                        <p>Your order has been delivered successfully.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-badge bg-primary">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Order Shipped</h6>
+                                        <p class="text-muted">June 18, 2023, 9:30 AM</p>
+                                        <p>Your order has been shipped. Tracking number: AB123456789CD</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-badge bg-info">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Order Processing</h6>
+                                        <p class="text-muted">June 16, 2023, 11:45 AM</p>
+                                        <p>Your order is being processed and packed.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-badge bg-secondary">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Payment Confirmed</h6>
+                                        <p class="text-muted">June 15, 2023, 3:20 PM</p>
+                                        <p>Your payment has been confirmed.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-badge bg-dark">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>Order Placed</h6>
+                                        <p class="text-muted">June 15, 2023, 3:15 PM</p>
+                                        <p>Your order has been placed successfully.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="text-end mt-4">
-                            <a href="profile.html#orders" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i> Back to Orders
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="account.html#orders" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Orders
                             </a>
-                            <a href="#" id="reorderBtn" class="btn btn-primary ms-2">
-                                <i class="fas fa-redo me-2"></i> Reorder
-                            </a>
+                            <button class="btn btn-primary" id="downloadInvoiceBtn">
+                                <i class="fas fa-file-pdf me-2"></i>Download Invoice
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -240,21 +306,21 @@
                 <div class="col-md-3 col-lg-3 mb-4">
                     <h5 class="text-uppercase mb-4">Shop</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/products?category=men" class="text-white text-decoration-none">Men's Clothing</a></li>
-                        <li class="mb-2"><a href="/products?category=women" class="text-white text-decoration-none">Women's Clothing</a></li>
-                        <li class="mb-2"><a href="/products?category=kids" class="text-white text-decoration-none">Kids' Clothing</a></li>
-                        <li class="mb-2"><a href="/products?category=accessories" class="text-white text-decoration-none">Accessories</a></li>
-                        <li><a href="/products?category=sale" class="text-white text-decoration-none">Sale</a></li>
+                        <li class="mb-2"><a href="/api/products?category=men" class="text-white text-decoration-none">Men's Clothing</a></li>
+                        <li class="mb-2"><a href="/api/products?category=women" class="text-white text-decoration-none">Women's Clothing</a></li>
+                        <li class="mb-2"><a href="/api/products?category=kids" class="text-white text-decoration-none">Kids' Clothing</a></li>
+                        <li class="mb-2"><a href="/api/products?category=accessories" class="text-white text-decoration-none">Accessories</a></li>
+                        <li><a href="/api/products?category=sale" class="text-white text-decoration-none">Sale</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3 col-lg-3 mb-4">
                     <h5 class="text-uppercase mb-4">Useful Links</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/account.html" class="text-white text-decoration-none">My Account</a></li>
-                        <li class="mb-2"><a href="orders.html" class="text-white text-decoration-none">Track Order</a></li>
-                        <li class="mb-2"><a href="/wishlist.html" class="text-white text-decoration-none">Wishlist</a></li>
-                        <li class="mb-2"><a href="/about.html" class="text-white text-decoration-none">About Us</a></li>
-                        <li><a href="/contact.html" class="text-white text-decoration-none">Contact Us</a></li>
+                        <li class="mb-2"><a href="account.html" class="text-white text-decoration-none">My Account</a></li>
+                        <li class="mb-2"><a href="account.html#orders" class="text-white text-decoration-none">Track Order</a></li>
+                        <li class="mb-2"><a href="wishlist.html" class="text-white text-decoration-none">Wishlist</a></li>
+                        <li class="mb-2"><a href="about.html" class="text-white text-decoration-none">About Us</a></li>
+                        <li><a href="contact.html" class="text-white text-decoration-none">Contact Us</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3 col-lg-3 mb-4">
@@ -290,7 +356,8 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/frontend/static/js/common.js"></script>
     <script src="/frontend/static/js/main.js"></script>
-    <script src="/frontend/static/js/order_detail.js"></script>
+    <script src="/frontend/static/js/order-detail.js"></script>
 </body>
 </html>
