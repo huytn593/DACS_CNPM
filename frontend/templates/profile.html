@@ -6,7 +6,7 @@
     <title>Profile - Fashion Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/frontend/static/css/style.css">
 </head>
 <body>
     <!-- Header -->
@@ -31,15 +31,15 @@
                                 Categories
                             </a>
                             <ul class="dropdown-menu" id="categoryDropdown" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="/products?category=all">All Categories</a></li>
+                                <li><a class="dropdown-item" href="products.html?category=all">All Categories</a></li>
                                 <!-- Categories will be loaded dynamically -->
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/products?category=sale">Sale</a>
+                            <a class="nav-link" href="products.html?category=sale">Sale</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/contact.html">Contact</a>
+                            <a class="nav-link" href="contact.html">Contact</a>
                         </li>
                     </ul>
                     <div class="d-flex align-items-center">
@@ -50,7 +50,7 @@
                             </button>
                         </form>
                         <div class="d-flex">
-                            <a href="/cart.html" class="btn btn-outline-dark position-relative me-2">
+                            <a href="cart.html" class="btn btn-outline-dark position-relative me-2">
                                 <i class="fas fa-shopping-cart"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary cart-count">0</span>
                             </a>
@@ -365,21 +365,21 @@
                 <div class="col-md-3 col-lg-3 mb-4">
                     <h5 class="text-uppercase mb-4">Shop</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/products?category=men" class="text-white text-decoration-none">Men's Clothing</a></li>
-                        <li class="mb-2"><a href="/products?category=women" class="text-white text-decoration-none">Women's Clothing</a></li>
-                        <li class="mb-2"><a href="/products?category=kids" class="text-white text-decoration-none">Kids' Clothing</a></li>
-                        <li class="mb-2"><a href="/products?category=accessories" class="text-white text-decoration-none">Accessories</a></li>
-                        <li><a href="/products?category=sale" class="text-white text-decoration-none">Sale</a></li>
+                        <li class="mb-2"><a href="products.html?category=men" class="text-white text-decoration-none">Men's Clothing</a></li>
+                        <li class="mb-2"><a href="products.html?category=women" class="text-white text-decoration-none">Women's Clothing</a></li>
+                        <li class="mb-2"><a href="products.html?category=kids" class="text-white text-decoration-none">Kids' Clothing</a></li>
+                        <li class="mb-2"><a href="products.html?category=accessories" class="text-white text-decoration-none">Accessories</a></li>
+                        <li><a href="products.html?category=sale" class="text-white text-decoration-none">Sale</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3 col-lg-3 mb-4">
                     <h5 class="text-uppercase mb-4">Useful Links</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/account.html" class="text-white text-decoration-none">My Account</a></li>
-                        <li class="mb-2"><a href="/orders.html" class="text-white text-decoration-none">Track Order</a></li>
-                        <li class="mb-2"><a href="/wishlist.html" class="text-white text-decoration-none">Wishlist</a></li>
-                        <li class="mb-2"><a href="/about.html" class="text-white text-decoration-none">About Us</a></li>
-                        <li><a href="/contact.html" class="text-white text-decoration-none">Contact Us</a></li>
+                        <li class="mb-2"><a href="profile.html" class="text-white text-decoration-none">My Account</a></li>
+                        <li class="mb-2"><a href="orders.html" class="text-white text-decoration-none">Track Order</a></li>
+                        <li class="mb-2"><a href="wishlist.html" class="text-white text-decoration-none">Wishlist</a></li>
+                        <li class="mb-2"><a href="about.html" class="text-white text-decoration-none">About Us</a></li>
+                        <li><a href="contact.html" class="text-white text-decoration-none">Contact Us</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3 col-lg-3 mb-4">
@@ -407,14 +407,14 @@
                 </div>
                 <div class="col-md-5 col-lg-4">
                     <div class="text-center text-md-end">
-                        <img src="/static/images/payment-methods.png" alt="Payment Methods" height="30">
+                        <img src="/frontend/static/images/payment-methods.png" alt="Payment Methods" height="30">
                     </div>
                 </div>
             </div>
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/main.js"></script>
-    <script src="/static/js/profile.js"></script>
+    <script src="/frontend/static/js/main.js"></script>
+    <script src="/frontend/static/js/profile.js"></script>
 </body>
 </html>
