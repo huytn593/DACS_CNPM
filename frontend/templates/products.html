@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Fashion Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/frontend/static/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-dark text-white">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="/">Fashion Store</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown">
+                                    Categories
+                                </a>
+                                <ul class="dropdown-menu" id="categoryMenu">
+                                    <!-- Categories will be loaded dynamically -->
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="products.html">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.html">Contact</a>
+                            </li>
+                        </ul>
+                        <form class="d-flex me-2" id="searchForm">
+                            <label for="searchInput"></label>
+                            <input class="form-control me-2" type="search" id="searchInput" placeholder="Search products...">
+                            <button class="btn btn-outline-light" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="cart.html">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="badge bg-danger" id="cartCount">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown" id="userDropdown">
+                                <!-- Will be replaced with user info or login link -->
+                                <a class="nav-link" href="login.html">
+                                    <i class="fas fa-user"></i> Login
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Product Listing Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Filter Sidebar -->
+                <div class="col-lg-3 mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Filters</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="filterForm">
+                                <!-- Category Filter -->
+                                <div class="mb-4">
+                                    <h6>Categories</h6>
+                                    <div id="categoryFilter">
+                                        <!-- Will be populated dynamically -->
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="all" id="allCategories" checked>
+                                            <label class="form-check-label" for="allCategories">
+                                                All Categories
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Price Range Filter -->
+                                <div class="mb-4">
+                                    <h6>Price Range</h6>
+                                    <div class="d-flex align-items-center">
+                                        <div class="input-group input-group-sm mb-3">
+                                            <span class="input-group-text">Min</span>
+                                            <label for="minPrice"></label>
+                                            <input type="number" class="form-control" id="minPrice" min="0">
+                                        </div>
+                                        <div class="mx-2">-</div>
+                                        <div class="input-group input-group-sm mb-3">
+                                            <span class="input-group-text">Max</span>
+                                            <label for="maxPrice"></label>
+                                            <input type="number" class="form-control" id="maxPrice" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Size Filter -->
+                                <div class="mb-4">
+                                    <h6>Sizes</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="S" id="sizeS">
+                                            <label class="form-check-label" for="sizeS">S</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="M" id="sizeM">
+                                            <label class="form-check-label" for="sizeM">M</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="L" id="sizeL">
+                                            <label class="form-check-label" for="sizeL">L</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="XL" id="sizeXL">
+                                            <label class="form-check-label" for="sizeXL">XL</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="XXL" id="sizeXXL">
+                                            <label class="form-check-label" for="sizeXXL">XXL</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Color Filter -->
+                                <div class="mb-4">
+                                    <h6>Colors</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Black" id="colorBlack">
+                                            <label class="form-check-label" for="colorBlack">Black</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="White" id="colorWhite">
+                                            <label class="form-check-label" for="colorWhite">White</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Red" id="colorRed">
+                                            <label class="form-check-label" for="colorRed">Red</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Blue" id="colorBlue">
+                                            <label class="form-check-label" for="colorBlue">Blue</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Green" id="colorGreen">
+                                            <label class="form-check-label" for="colorGreen">Green</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-primary w-100" id="applyFiltersBtn">Apply Filters</button>
+                                <button type="button" class="btn btn-outline-secondary w-100 mt-2" id="resetFiltersBtn">Reset Filters</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="col-lg-9">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>All Products</h3>
+                        <div class="d-flex align-items-center">
+                            <label for="sortOptions" class="me-2">Sort by:</label>
+                            <select class="form-select form-select-sm" id="sortOptions" style="width: auto;">
+                                <option value="newest">Newest</option>
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
+                                <option value="popular">Popularity</option>
+                                <option value="rating">Rating</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="productGrid">
+                        <!-- Products will be loaded dynamically -->
+                        <div class="col">
+                            <div class="card h-100 product-card">
+                                <div class="position-relative">
+                                    <img src="/frontend/static/images/Dat.jpg" class="card-img-top" alt="Product Image">
+                                    <div class="card-buttons position-absolute top-0 end-0 m-2">
+                                        <button class="btn btn-sm btn-light rounded-circle me-1 add-to-wishlist" title="Add to Wishlist">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light rounded-circle quick-view" title="Quick View" data-product-id="1">
+                                            <i class="far fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Product Name</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-primary fw-bold">$99.99</span>
+                                        <div class="rating">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="far fa-star text-warning"></i>
+                                            <small class="text-muted">(24)</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-outline-primary d-block w-100 mt-3 add-to-cart-btn">
+                                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading placeholder -->
+                        <div class="col-12 text-center py-5" id="productsLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+
+                        <!-- No products message -->
+                        <div class="col-12 text-center py-5 d-none" id="noProductsMessage">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h4>No products found</h4>
+                            <p class="text-muted">Try adjusting your search or filter to find what you're looking for.</p>
+                            <button class="btn btn-outline-primary mt-3" id="clearFiltersBtn">
+                                <i class="fas fa-filter me-2"></i>Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Product pagination" class="mt-5">
+                        <ul class="pagination justify-content-center" id="productPagination">
+                            <!-- Pagination will be added dynamically -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick View Modal -->
+    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quickViewModalLabel">Product Quick View</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="quickViewContent">
+                    <!-- Quick view content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="#" class="btn btn-primary" id="viewDetailsBtn">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Fashion Store</h5>
+                    <p>Your one-stop destination for trendy fashion.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-white">Home</a></li>
+                        <li><a href="about.html" class="text-white">About Us</a></li>
+                        <li><a href="contact.html" class="text-white">Contact</a></li>
+                        <li><a href="#" class="text-white">FAQs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <p>Email: info@fashionstore.com</p>
+                    <p>Phone: +84 123 456 789</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2023 Fashion Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/frontend/static/js/common.js"></script>
+    <script src="/frontend/static/js/products.js"></script>
+</body>
+</html>
