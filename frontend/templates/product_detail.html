@@ -6,7 +6,7 @@
     <title>Product Detail - Fashion Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/frontend/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <!-- Header -->
@@ -21,7 +21,7 @@
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item">
-                                <a class="nav-link active" href="/">Home</a>
+                                <a class="nav-link" href="/">Home</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown">
@@ -31,9 +31,14 @@
                                     <!-- Categories will be loaded dynamically -->
                                 </ul>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="about.html">About Us</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.html">Contact</a>
+                            </li>
                         </ul>
                         <form class="d-flex me-2" id="searchForm">
-                            <label for="searchInput"></label>
                             <input class="form-control me-2" type="search" id="searchInput" placeholder="Search products...">
                             <button class="btn btn-outline-light" type="submit">
                                 <i class="fas fa-search"></i>
@@ -59,103 +64,178 @@
         </div>
     </header>
 
-    <!-- Product Detail -->
+    <!-- Product Detail Section -->
     <section class="py-5">
         <div class="container">
-            <div class="row" id="productDetail">
-                <!-- Product details will be loaded dynamically -->
-                <div class="col-12 text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+            <div id="loadingSpinner" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
+                <p class="mt-2">Loading product details...</p>
             </div>
 
-            <!-- Reviews Section -->
-            <div class="row mt-5">
-                <div class="col-12">
-                    <h3>Customer Reviews</h3>
-                    <hr>
+            <div id="productDetail" class="row" style="display: none;">
+                <div class="col-md-6 mb-4">
+                    <div id="productImages" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner rounded" id="productImageCarousel">
+                            <!-- Product images will be loaded dynamically -->
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#productImages" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#productImages" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                        <div class="row mt-2" id="productThumbnails">
+                            <!-- Product thumbnails will be loaded dynamically -->
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Leave a Review -->
-                <div class="col-md-4 mb-4" id="reviewFormContainer">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Leave a Review</h5>
-                            <form id="reviewForm">
-                                <div class="mb-3">
-                                    <label class="form-label">Rating</label>
-                                    <div class="rating">
-                                        <i class="far fa-star star-rating" data-rating="1"></i>
-                                        <i class="far fa-star star-rating" data-rating="2"></i>
-                                        <i class="far fa-star star-rating" data-rating="3"></i>
-                                        <i class="far fa-star star-rating" data-rating="4"></i>
-                                        <i class="far fa-star star-rating" data-rating="5"></i>
-                                    </div>
-                                    <input type="hidden" id="ratingInput" value="0">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="reviewComment" class="form-label">Comment (Optional)</label>
-                                    <textarea class="form-control" id="reviewComment" rows="3"></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary" id="submitReviewBtn">Submit Review</button>
-                            </form>
+                <div class="col-md-6">
+                    <h2 id="productName" class="mb-3"></h2>
+                    <div class="d-flex align-items-center mb-3">
+                        <div id="productRating"></div>
+                        <span id="reviewCount" class="ms-2 text-muted"></span>
+                    </div>
+                    <h3 id="productPrice" class="text-primary mb-4"></h3>
+                    <p id="productDescription" class="mb-4"></p>
+
+                    <div class="mb-4">
+                        <h5>Size</h5>
+                        <div class="d-flex flex-wrap" id="sizeOptions">
+                            <!-- Size options will be loaded dynamically -->
                         </div>
                     </div>
 
-                    <!-- Report Product -->
-                    <div class="card mt-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Report Product</h5>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
-                                <i class="fas fa-flag"></i> Report this product
+                    <div class="mb-4">
+                        <h5>Color</h5>
+                        <div class="d-flex flex-wrap" id="colorOptions">
+                            <!-- Color options will be loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="input-group me-3" style="width: 130px;">
+                            <button class="btn btn-outline-secondary" type="button" id="decreaseQuantity">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="form-control text-center" id="quantityInput" value="1" min="1">
+                            <button class="btn btn-outline-secondary" type="button" id="increaseQuantity">
+                                <i class="fas fa-plus"></i>
                             </button>
                         </div>
+                        <span id="stockInfo" class="text-muted"></span>
                     </div>
-                </div>
 
-                <!-- Reviews List -->
-                <div class="col-md-8">
-                    <div id="reviewsList">
-                        <!-- Reviews will be loaded dynamically -->
-                        <p class="text-center" id="noReviewsMessage">No reviews yet. Be the first to review this product!</p>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <button class="btn btn-primary flex-grow-1" id="addToCartBtn">
+                            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                        </button>
+                        <button class="btn btn-outline-danger" id="reportProductBtn">
+                            <i class="fas fa-flag"></i> Report
+                        </button>
+                    </div>
+
+                    <div class="alert alert-success mt-3" id="addToCartSuccess" style="display: none;">
+                        Product added to cart successfully!
+                    </div>
+                    <div class="alert alert-danger mt-3" id="addToCartError" style="display: none;">
+                        Failed to add product to cart. Please try again.
                     </div>
                 </div>
             </div>
 
-            <!-- Similar Products -->
+            <!-- Product Reviews Section -->
+            <div class="row mt-5" id="reviewsSection" style="display: none;">
+                <div class="col-12">
+                    <h3 class="mb-4">Customer Reviews</h3>
+                    <div id="reviewsList">
+                        <!-- Reviews will be loaded dynamically -->
+                    </div>
+
+                    <div id="noReviews" class="text-center py-4" style="display: none;">
+                        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                    </div>
+
+                    <div id="writeReviewSection" class="mt-4 p-4 border rounded">
+                        <h4 class="mb-3">Write a Review</h4>
+                        <div id="loginToReview" style="display: none;">
+                            <p>Please <a href="login.html?returnUrl=product_detail.html?id=">login</a> to write a review.</p>
+                        </div>
+                        <div id="reviewForm" style="display: none;">
+                            <div class="mb-3">
+                                <label for="ratingInput" class="form-label">Rating</label>
+                                <div class="rating-input">
+                                    <i class="far fa-star rating-star" data-rating="1"></i>
+                                    <i class="far fa-star rating-star" data-rating="2"></i>
+                                    <i class="far fa-star rating-star" data-rating="3"></i>
+                                    <i class="far fa-star rating-star" data-rating="4"></i>
+                                    <i class="far fa-star rating-star" data-rating="5"></i>
+                                </div>
+                                <input type="hidden" id="ratingInput" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="reviewComment" class="form-label">Your Review</label>
+                                <textarea class="form-control" id="reviewComment" rows="3" placeholder="Write your review here..."></textarea>
+                            </div>
+                            <button class="btn btn-primary" id="submitReviewBtn">Submit Review</button>
+                            <div class="alert alert-success mt-3" id="reviewSuccess" style="display: none;">
+                                Your review has been submitted successfully!
+                            </div>
+                            <div class="alert alert-danger mt-3" id="reviewError" style="display: none;">
+                                Failed to submit review. Please try again.
+                            </div>
+                            <div class="alert alert-warning mt-3" id="reviewWarning" style="display: none;">
+                                You can only review products you have purchased.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products Section -->
             <div class="row mt-5">
                 <div class="col-12">
-                    <h3>You May Also Like</h3>
-                    <hr>
-                </div>
-                <div class="row" id="similarProducts">
-                    <!-- Similar products will be loaded dynamically -->
+                    <h3 class="mb-4">You May Also Like</h3>
+                    <div class="row" id="relatedProducts">
+                        <!-- Related products will be loaded dynamically -->
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Report Modal -->
-    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <!-- Report Product Modal -->
+    <div class="modal fade" id="reportProductModal" tabindex="-1" aria-labelledby="reportProductModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="reportModalLabel">Report Product</h5>
+                    <h5 class="modal-title" id="reportProductModalLabel">Report Product</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="reportForm">
+                    <div id="loginToReport" style="display: none;">
+                        <p>Please <a href="login.html">login</a> to report this product.</p>
+                    </div>
+                    <div id="reportForm" style="display: none;">
                         <div class="mb-3">
-                            <label for="reportDescription" class="form-label">Description of the issue</label>
-                            <textarea class="form-control" id="reportDescription" rows="4" required></textarea>
+                            <label for="reportReason" class="form-label">Reason for report</label>
+                            <select class="form-select" id="reportReason">
+                                <option value="">Select a reason</option>
+                                <option value="counterfeit">Counterfeit product</option>
+                                <option value="inappropriate">Inappropriate content</option>
+                                <option value="misleading">Misleading description</option>
+                                <option value="other">Other</option>
+                            </select>
                         </div>
                         <div class="mb-3">
-                            <label for="reportedLink" class="form-label">Link to evidence (Optional)</label>
-                            <input type="url" class="form-control" id="reportedLink">
+                            <label for="reportDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="reportDescription" rows="3" placeholder="Please provide details about your report..."></textarea>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -166,7 +246,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
+    <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
@@ -177,15 +257,15 @@
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="/" class="text-white">Home</a></li>
-                        <li><a href="#" class="text-white">About Us</a></li>
-                        <li><a href="#" class="text-white">Contact</a></li>
+                        <li><a href="about.html" class="text-white">About Us</a></li>
+                        <li><a href="contact.html" class="text-white">Contact</a></li>
                         <li><a href="#" class="text-white">FAQs</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
                     <h5>Contact Us</h5>
                     <p>Email: info@fashionstore.com</p>
-                    <p>Phone: +123-456-7890</p>
+                    <p>Phone: +84 123 456 789</p>
                     <div class="social-links">
                         <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
@@ -198,10 +278,27 @@
                 <p>&copy; 2023 Fashion Store. All rights reserved.</p>
             </div>
         </div>
+        <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginRequiredModalLabel">Login Required</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="loginModalMessage">Please log in to continue.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <a href="login.html" class="btn btn-primary">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/frontend/static/js/common.js"></script>
-    <script src="/frontend/static/js/product_detail.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/product_detail.js"></script>
 </body>
 </html>

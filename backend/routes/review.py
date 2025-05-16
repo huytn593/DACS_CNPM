@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, Body, HTTPException, status
+from fastapi import APIRouter, Depends, Path, Body, status
 from typing import List
 
 from ..models.review import ReviewCreate, ReviewResponse
@@ -17,8 +17,10 @@ async def review_product(
     """
     Add a review to a product
     """
-    return await create_review(product_id=product_id, user_id=current_user.id, review=review)
-
+    return await create_review(
+        product_id=product_id,
+        user_id=current_user["id"],
+        review=review)
 
 @router.get("/products/{product_id}/reviews", response_model=List[ReviewResponse])
 async def get_reviews(product_id: str = Path(...)):

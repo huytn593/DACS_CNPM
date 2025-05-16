@@ -6,7 +6,7 @@
     <title>Shopping Cart - Fashion Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/frontend/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <!-- Header -->
@@ -27,91 +27,266 @@
                                 <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown">
                                     Categories
                                 </a>
-                                <ul class="dropdown-menu" id="categoryMenu">
-                                    <!-- Categories will be loaded dynamically -->
-                                </ul>
-                            </li>
-                        </ul>
-                        <form class="d-flex me-2" id="searchForm">
-                            <label for="searchInput"></label>
-                            <input class="form-control me-2" type="search" id="searchInput" placeholder="Search products...">
-                            <button class="btn btn-outline-light" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </form>
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link active" href="cart.html">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <span class="badge bg-danger" id="cartCount">0</span>
-                                </a>
-                            </li>
-                            <li class="nav-item dropdown" id="userDropdown">
-                                <!-- Will be replaced with user info or login link -->
-                                <a class="nav-link" href="login.html">
-                                    <i class="fas fa-user"></i> Login
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
+                                                <ul class="dropdown-menu" id="categoryMenu">
+                    <!-- Categories will be loaded dynamically -->
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="about.html">About Us</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="contact.html">Contact</a>
+            </li>
+        </ul>
+        <form class="d-flex me-2" id="searchForm">
+            <input class="form-control me-2" type="search" id="searchInput" placeholder="Search products...">
+            <button class="btn btn-outline-light" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link active" href="cart.html">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="badge bg-danger" id="cartCount">0</span>
+                </a>
+            </li>
+            <li class="nav-item dropdown" id="userDropdown">
+                <!-- Will be replaced with user info or login link -->
+                <a class="nav-link" href="login.html">
+                    <i class="fas fa-user"></i> Login
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+</nav>
+</div>
+</header>
 
-    <!-- Shopping Cart -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="mb-4">Shopping Cart</h2>
-            
-            <div id="cartContent">
-                <!-- Cart items will be loaded dynamically -->
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
+<!-- Cart Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="mb-4">Your Shopping Cart</h2>
+
+        <div id="cartLoadingSpinner" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
+            <p class="mt-2">Loading your cart...</p>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
-        <div class="container">
+        <div id="cartContent" style="display: none;">
             <div class="row">
-                <div class="col-md-4">
-                    <h5>Fashion Store</h5>
-                    <p>Your one-stop destination for trendy fashion.</p>
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <table class="table table-hover" id="cartTable">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cartItems">
+                                    <!-- Cart items will be loaded dynamically -->
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="/" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                                </a>
+                                <button id="clearCartBtn" class="btn btn-outline-danger">
+                                    <i class="fas fa-trash me-2"></i>Clear Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="/" class="text-white">Home</a></li>
-                        <li><a href="#" class="text-white">About Us</a></li>
-                        <li><a href="#" class="text-white">Contact</a></li>
-                        <li><a href="#" class="text-white">FAQs</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Contact Us</h5>
-                    <p>Email: info@fashionstore.com</p>
-                    <p>Phone: +123-456-7890</p>
-                    <div class="social-links">
-                        <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Order Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Subtotal</span>
+                                <span id="cartSubtotal">₫0</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Shipping</span>
+                                <span id="shippingFee">₫30,000</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-3">
+                                <strong>Total</strong>
+                                <strong id="cartTotal">₫0</strong>
+                            </div>
+
+                            <div id="promoCodeSection" class="mb-3">
+                                <label for="promoCode" class="form-label">Promo Code</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="promoCode" placeholder="Enter promo code">
+                                    <button class="btn btn-outline-secondary" type="button" id="applyPromoBtn">Apply</button>
+                                </div>
+                                <div class="text-success mt-1" id="promoSuccess" style="display: none;"></div>
+                                <div class="text-danger mt-1" id="promoError" style="display: none;"></div>
+                            </div>
+
+                            <button id="checkoutBtn" class="btn btn-primary w-100">
+                                Proceed to Checkout
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h6 class="mb-3">We Accept</h6>
+                            <div class="d-flex justify-content-between payment-icons">
+                                <i class="fab fa-cc-visa fa-2x"></i>
+                                <i class="fab fa-cc-mastercard fa-2x"></i>
+                                <i class="fab fa-cc-paypal fa-2x"></i>
+                                <i class="fab fa-cc-apple-pay fa-2x"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <hr>
-            <div class="text-center">
-                <p>&copy; 2023 Fashion Store. All rights reserved.</p>
+        </div>
+
+        <div id="emptyCart" class="text-center py-5" style="display: none;">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h4>Your cart is empty</h4>
+            <p class="text-muted">Looks like you haven't added any products to your cart yet.</p>
+            <a href="/" class="btn btn-primary mt-3">Start Shopping</a>
+        </div>
+    </div>
+</section>
+
+<!-- Quantity Update Modal -->
+<div class="modal fade" id="quantityModal" tabindex="-1" aria-labelledby="quantityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quantityModalLabel">Update Quantity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="updateItemId">
+                <div class="mb-3">
+                    <label for="itemQuantity" class="form-label">Quantity</label>
+                    <input type="number" class="form-control" id="itemQuantity" min="1" value="1">
+                </div>
+                <div class="alert alert-danger" id="quantityError" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateQuantityBtn">Update</button>
             </div>
         </div>
-    </footer>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/frontend/static/js/common.js"></script>
-    <script src="/frontend/static/js/cart.js"></script>
+<!-- Remove Item Confirmation Modal -->
+<div class="modal fade" id="removeItemModal" tabindex="-1" aria-labelledby="removeItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeItemModalLabel">Remove Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="removeItemId">
+                <p>Are you sure you want to remove this item from your cart?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmRemoveBtn">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Cart Confirmation Modal -->
+<div class="modal fade" id="clearCartModal" tabindex="-1" aria-labelledby="clearCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clearCartModalLabel">Clear Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to clear all items from your cart?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmClearBtn">Clear Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Login Reminder Modal -->
+<div class="modal fade" id="loginReminderModal" tabindex="-1" aria-labelledby="loginReminderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginReminderModalLabel">Login Required</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You need to be logged in to proceed to checkout.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="/login.html" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5>Fashion Store</h5>
+                <p>Your one-stop destination for trendy fashion.</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="/" class="text-white">Home</a></li>
+                    <li><a href="about.html" class="text-white">About Us</a></li>
+                    <li><a href="contact.html" class="text-white">Contact</a></li>
+                    <li><a href="#" class="text-white">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Contact Us</h5>
+                <p>Email: info@fashionstore.com</p>
+                <p>Phone: +84 123 456 789</p>
+                <div class="social-links">
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <p>&copy; 2023 Fashion Store. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/cart.js"></script>
 </body>
 </html>

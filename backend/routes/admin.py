@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Path, Body, status
-from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, Path, Body, status
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from ..controllers.admin_controller import (
     get_all_products,
-    create_product,
-    update_product,
     delete_product,
     get_all_orders,
     update_order_status,
@@ -16,12 +14,15 @@ from ..controllers.admin_controller import (
     add_category,
     update_category,
     delete_category,
-    get_dashboard_stats
+    get_dashboard_stats,
+    get_admin_dashboard_stats,
+    get_admin_sales_stats
 )
-from ..models.product import ProductCreate, ProductUpdate, ProductResponse
+from ..models.product import ProductResponse
 from ..models.order import OrderUpdate, OrderResponse as Order
 from ..models.user import UserResponse as User
 from ..models.category import CategoryCreate, CategoryUpdate, CategoryResponse
+from ..models.stats import DashboardStats, SalesStats, SellerDashboardStats
 from ..utils.auth import get_current_user, admin_required
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -202,37 +203,23 @@ async def admin_delete_category(
     Delete a product category
     """
     return await delete_category(category_id)
-# Trong file routes/admin.py
 @router.get("/stats/sales", response_model=Dict[str, Any])
 async def get_sales_stats(
     date_range: str = Query("week", enum=["day", "week", "month", "year"]),
-    current_user = Depends(get_admin_user)
+    _= Depends(admin_required)
 ):
     """Get sales statistics for admin dashboard"""
     return await get_admin_sales_stats(date_range)
+
 @router.get("/dashboard/stats", response_model=DashboardStats)
-async def get_dashboard_stats(current_user=Depends(get_admin_user)):
+async def get_dashboard_stats(_=Depends(admin_required)):
     """Lấy thống kê tổng quan cho dashboard"""
     return await get_admin_dashboard_stats()
 
 @router.get("/dashboard/sales", response_model=SalesStats)
-async def get_sales_stats(
+async def get_sales_stats_by_date_range(
     date_range: str = Query("week", enum=["day", "week", "month", "year"]),
-    current_user=Depends(get_admin_user)
+    _=Depends(admin_required)
 ):
     """Lấy thống kê doanh số theo khoảng thời gian"""
     return await get_admin_sales_stats(date_range)
-
-# Tương tự trong file backend/routes/seller.py
-@router.get("/dashboard/stats", response_model=SellerDashboardStats)
-async def get_seller_dashboard_stats(current_user=Depends(get_seller_user)):
-    """Lấy thống kê tổng quan cho seller dashboard"""
-    return await get_seller_dashboard_stats(current_user["id"])
-
-@router.get("/dashboard/sales", response_model=SellerSalesStats)
-async def get_seller_sales_stats(
-    date_range: str = Query("week", enum=["day", "week", "month", "year"]),
-    current_user=Depends(get_seller_user)
-):
-    """Lấy thống kê doanh số seller theo khoảng thời gian"""
-    return await get_seller_sales_stats(current_user["id"], date_range)

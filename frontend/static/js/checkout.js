@@ -1,531 +1,502 @@
-// Lưu thông tin đơn hàng
-let orderData = {
-    shippingInfo: {},
-    paymentMethod: 'cod',
-    cardDetails: {},
-    items: [],
-    subtotal: 0,
-    shipping: 30000,
-    total: 0
-};
+// static/js/checkout.js
 
-// Khởi tạo quá trình thanh toán
-document.addEventListener('DOMContentLoaded', async () => {
-    // Kiểm tra đăng nhập
-    const token = localStorage.getItem('accessToken');
+let cartData = null;
+let selectedShippingMethod = "standard";
+let selectedPaymentMethod = "cod";
+let shippingInfo = {};
+let orderNotes = "";
+let shippingFee = 30000;
+let subtotalAmount = 0;
+let totalAmount = 0;
 
-    if (!token) {
-        // Chuyển hướng đến trang đăng nhập
-        window.location.href = '/login.html?returnUrl=' + encodeURIComponent('/checkout.html');
-        return;
-    }
+document.addEventListener("DOMContentLoaded", function() {
+    // Check if user is authenticated
+    checkAuthAndUpdateUI().then(user => {
+        if (!user) {
+            // Redirect to login page if not authenticated
+            window.location.href = "/login.html?redirect=checkout.html";
+            return;
+        }
 
-    // Tải giỏ hàng
-    await loadCart();
-
-    // Cập nhật trạng thái người dùng trong header
-    updateUserState();
-
-    // Load thông tin mặc định từ hồ sơ người dùng
-    await loadUserProfile();
-
-    // Thêm event listener cho form shipping
-    document.getElementById('shippingForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveShippingInfo();
-        goToPaymentStep();
+        // Load cart data
+        loadCartData();
     });
 
-    // Thêm event listener cho form payment
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        savePaymentInfo();
-        goToConfirmationStep();
-    });
-
-    // Xử lý nút back
-    document.getElementById('backToShippingBtn').addEventListener('click', goToShippingStep);
-    document.getElementById('backToPaymentBtn').addEventListener('click', goToPaymentStep);
-
-    // Xử lý thanh toán bằng thẻ
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const cardPaymentDetails = document.getElementById('cardPaymentDetails');
-            if (this.value === 'card') {
-                cardPaymentDetails.style.display = 'block';
-            } else {
-                cardPaymentDetails.style.display = 'none';
-            }
-        });
-    });
-
-    // Đồng ý với điều khoản
-    document.getElementById('termsAgreement').addEventListener('change', function() {
-        document.getElementById('placeOrderBtn').disabled = !this.checked;
-    });
-
-    // Xử lý đặt hàng
-    document.getElementById('placeOrderBtn').addEventListener('click', placeOrder);
-
-    // Load danh mục sản phẩm động
-    loadCategories();
+    // Initialize event listeners
+    initializeEventListeners();
 });
 
-// Tải giỏ hàng
-async function loadCart() {
-    const token = localStorage.getItem('accessToken');
-
+// Function to load cart data
+async function loadCartData() {
     try {
-        const response = await fetch('/cart', {
+        document.getElementById("orderSummaryLoading").style.display = "block";
+        document.getElementById("orderSummary").style.display = "none";
+
+        const response = await fetch("/api/cart", {
+            method: "GET",
             headers: {
-                'Authorization': `Bearer ${token}`
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
             }
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch cart');
+        if (response.ok) {
+            cartData = await response.json();
+
+            // Check if cart is empty
+            if (!cartData.items || cartData.items.length === 0) {
+                window.location.href = "/cart.html";
+                return;
+            }
+
+            // Render order summary
+            renderOrderSummary();
+
+            // Hide loading, show order summary
+            document.getElementById("orderSummaryLoading").style.display = "none";
+            document.getElementById("orderSummary").style.display = "block";
+        } else {
+            // If error, redirect to cart page
+            window.location.href = "/cart.html";
         }
-
-        const cart = await response.json();
-
-        // Nếu giỏ hàng trống, chuyển hướng về trang giỏ hàng
-        if (!cart.items || cart.items.length === 0) {
-            window.location.href = '/cart.html';
-            return;
-        }
-
-        // Lưu các sản phẩm trong giỏ hàng vào orderData
-        orderData.items = cart.items;
-
-        // Tính toán tổng tiền
-        orderData.subtotal = cart.items.reduce((total, item) => {
-            return total + (item.product.price * item.quantity);
-        }, 0);
-
-        // Tính tổng tiền đơn hàng
-        orderData.total = orderData.subtotal + orderData.shipping;
-
-        // Hiển thị tóm tắt đơn hàng
-        displayOrderSummary();
-
     } catch (error) {
-        console.error('Error:', error);
-        showAlert('Failed to load your cart. Please try again later.', 'danger');
+        console.error("Error loading cart data:", error);
+        window.location.href = "/cart.html";
     }
 }
 
-// Hiển thị tóm tắt đơn hàng
-function displayOrderSummary() {
-    const orderSummaryElement = document.getElementById('orderSummary');
+// Function to render order summary
+function renderOrderSummary() {
+    const cartItemsContainer = document.getElementById("cartItems");
+    cartItemsContainer.innerHTML = "";
 
-    const html = `
-        <div class="d-flex justify-content-between mb-2">
-            <span>Subtotal:</span>
-            <span>${formatCurrency(orderData.subtotal)}</span>
-        </div>
-        <div class="d-flex justify-content-between mb-2">
-            <span>Shipping:</span>
-            <span>${formatCurrency(orderData.shipping)}</span>
-        </div>
-        <hr>
-        <div class="d-flex justify-content-between mb-4 fw-bold">
-            <span>Total:</span>
-            <span>${formatCurrency(orderData.total)}</span>
-        </div>
+    // Calculate subtotal
+    subtotalAmount = 0;
 
-        <div class="order-items-summary">
-            <h5 class="mb-3">Order Items (${orderData.items.length})</h5>
-            ${orderData.items.map(item => `
-                <div class="d-flex justify-content-between align-items-center mb-2">
+    // Render each item
+    cartData.items.forEach(item => {
+        const itemTotal = item.product.price * item.quantity;
+        subtotalAmount += itemTotal;
+
+        cartItemsContainer.innerHTML += `
+            <div class="d-flex mb-3">
+                <img src="${item.product.image_url || '/static/img/default-product.jpg'}" alt="${item.product.name}" class="cart-item-thumbnail me-2">
+                <div class="flex-grow-1">
+                    <h6 class="mb-0">${item.product.name}</h6>
+                    <div class="small text-muted">
+                        ${item.size ? `Size: ${item.size}` : ""}
+                        ${item.color ? `Color: ${item.color}` : ""}
+                    </div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <span>${formatCurrency(item.product.price)} × ${item.quantity}</span>
+                        <span>${formatCurrency(itemTotal)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    // Update totals
+    updateOrderTotals();
+}
+
+// Function to update order totals
+function updateOrderTotals() {
+    // Update shipping fee based on selected method
+    shippingFee = selectedShippingMethod === "express" ? 60000 : 30000;
+
+    // Calculate total
+    totalAmount = subtotalAmount + shippingFee;
+
+    // Update display
+    document.getElementById("subtotal").textContent = formatCurrency(subtotalAmount);
+    document.getElementById("shipping").textContent = formatCurrency(shippingFee);
+    document.getElementById("total").textContent = formatCurrency(totalAmount);
+}
+
+// Function to initialize event listeners
+function initializeEventListeners() {
+    // Shipping form submit
+    document.getElementById("shippingForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        // Validate form
+        if (!this.checkValidity()) {
+            e.stopPropagation();
+            this.classList.add("was-validated");
+            return;
+        }
+
+        // Store shipping info
+        shippingInfo = {
+            name: document.getElementById("fullName").value,
+            phone: document.getElementById("phone").value,
+            address: document.getElementById("address").value,
+            city: document.getElementById("city").value,
+            district: document.getElementById("district").value,
+            zip_code: document.getElementById("zipCode").value
+        };
+
+        // Get selected shipping method
+        selectedShippingMethod = document.querySelector('input[name="shippingMethod"]:checked').value;
+
+        // Update order totals
+        updateOrderTotals();
+
+        // Move to payment step
+        goToStep("paymentStep");
+    });
+
+    // Payment form submit
+    document.getElementById("paymentForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        // Get selected payment method
+        selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+        // Validate credit card details if credit card is selected
+        if (selectedPaymentMethod === "credit_card") {
+            const cardName = document.getElementById("cardName").value;
+            const cardNumber = document.getElementById("cardNumber").value;
+            const expMonth = document.getElementById("expMonth").value;
+            const expYear = document.getElementById("expYear").value;
+            const cvv = document.getElementById("cvv").value;
+
+            if (!cardName || !cardNumber || !expMonth || !expYear || !cvv) {
+                alert("Please fill in all credit card details");
+                return;
+            }
+        }
+
+        // Prepare review step
+        prepareReviewStep();
+
+        // Move to review step
+        goToStep("reviewStep");
+    });
+
+    // Back to shipping button
+    document.getElementById("backToShippingBtn").addEventListener("click", function() {
+        goToStep("shippingStep");
+    });
+
+    // Back to payment button
+    document.getElementById("backToPaymentBtn").addEventListener("click", function() {
+        goToStep("paymentStep");
+        });
+
+    // Place order button
+    document.getElementById("placeOrderBtn").addEventListener("click", async function() {
+        // Get order notes
+        orderNotes = document.getElementById("orderNotes").value;
+
+        // Create order
+        await createOrder();
+    });
+
+    // Change shipping method
+    document.getElementsByName("shippingMethod").forEach(function(radio) {
+        radio.addEventListener("change", function() {
+            selectedShippingMethod = this.value;
+            updateOrderTotals();
+        });
+    });
+
+    // Payment method selection
+    document.getElementsByName("paymentMethod").forEach(function(radio) {
+        radio.addEventListener("change", function() {
+            selectedPaymentMethod = this.value;
+
+            // Show/hide credit card form
+            const creditCardForm = document.getElementById("creditCardForm");
+            if (this.value === "credit_card") {
+                creditCardForm.style.display = "block";
+            } else {
+                creditCardForm.style.display = "none";
+            }
+
+            // Update payment method selection highlighting
+            document.querySelectorAll('.payment-method').forEach(el => {
+                if (el.dataset.payment === this.value) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            });
+        });
+    });
+
+    // Initially select the first payment method
+    document.querySelector('.payment-method').classList.add('selected');
+}
+
+// Function to navigate between checkout steps
+function goToStep(stepId) {
+    // Hide all steps
+    document.querySelectorAll('.checkout-step-content').forEach(function(step) {
+        step.style.display = "none";
+    });
+
+    // Show the requested step
+    document.getElementById(stepId).style.display = "block";
+
+    // Update step indicators
+    updateStepIndicators(stepId);
+}
+
+// Function to update step indicators
+function updateStepIndicators(currentStepId) {
+    const stepNumbers = document.querySelectorAll('.checkout-step-number');
+
+    // Reset all to default
+    stepNumbers.forEach(number => {
+        number.classList.remove('active', 'completed');
+    });
+
+    // Mark steps as completed or active based on current step
+    if (currentStepId === "paymentStep") {
+        stepNumbers[0].classList.add('completed');
+        stepNumbers[1].classList.add('completed');
+        stepNumbers[2].classList.add('active');
+    } else if (currentStepId === "reviewStep") {
+        stepNumbers[0].classList.add('completed');
+        stepNumbers[1].classList.add('completed');
+        stepNumbers[2].classList.add('completed');
+        stepNumbers[3].classList.add('active');
+    } else if (currentStepId === "confirmationStep") {
+        stepNumbers[0].classList.add('completed');
+        stepNumbers[1].classList.add('completed');
+        stepNumbers[2].classList.add('completed');
+        stepNumbers[3].classList.add('completed');
+    } else {
+        // Shipping step or default
+        stepNumbers[0].classList.add('completed');
+        stepNumbers[1].classList.add('active');
+    }
+}
+
+// Function to prepare review step
+function prepareReviewStep() {
+    // Populate shipping info
+    document.getElementById("reviewName").textContent = shippingInfo.name;
+    document.getElementById("reviewPhone").textContent = shippingInfo.phone;
+    document.getElementById("reviewAddress").textContent = shippingInfo.address;
+    document.getElementById("reviewCity").textContent = shippingInfo.city;
+    document.getElementById("reviewDistrict").textContent = shippingInfo.district;
+    document.getElementById("reviewZip").textContent = shippingInfo.zip_code || "N/A";
+
+    // Populate payment method
+    let paymentMethodText = "Cash on Delivery";
+    if (selectedPaymentMethod === "credit_card") {
+        paymentMethodText = "Credit/Debit Card";
+    } else if (selectedPaymentMethod === "bank_transfer") {
+        paymentMethodText = "Bank Transfer";
+    }
+    document.getElementById("reviewPaymentMethod").textContent = paymentMethodText;
+
+    // Populate shipping method
+    let shippingMethodText = "Standard Shipping (3-5 business days)";
+    if (selectedShippingMethod === "express") {
+        shippingMethodText = "Express Shipping (1-2 business days)";
+    }
+    document.getElementById("reviewShippingMethod").textContent = shippingMethodText;
+
+    // Populate order items
+    const reviewItemsContainer = document.getElementById("reviewItems");
+    reviewItemsContainer.innerHTML = "";
+
+    cartData.items.forEach(item => {
+        const itemTotal = item.product.price * item.quantity;
+
+        reviewItemsContainer.innerHTML += `
+            <tr>
+                <td>
                     <div class="d-flex align-items-center">
-                        <img src="${item.product.image || '/static/images/product-placeholder.jpg'}" class="img-thumbnail me-2" width="40" height="40" style="object-fit: cover;" alt="${item.product.name}">
+                        <img src="${item.product.image_url || '/static/img/default-product.jpg'}" alt="${item.product.name}" class="cart-item-thumbnail me-2">
                         <div>
-                            <p class="mb-0 fw-medium">${item.product.name}</p>
-                            <small class="text-muted">Size: ${item.size}, Color: ${item.color}</small>
+                            <div>${item.product.name}</div>
+                            <div class="small text-muted">
+                                ${item.size ? `Size: ${item.size}` : ""}
+                                ${item.color ? `Color: ${item.color}` : ""}
+                            </div>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <p class="mb-0">${item.quantity} x ${formatCurrency(item.product.price)}</p>
-                        <p class="mb-0 fw-medium">${formatCurrency(item.product.price * item.quantity)}</p>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
+                </td>
+                <td>${formatCurrency(item.product.price)}</td>
+                <td class="text-center">${item.quantity}</td>
+                <td class="text-end">${formatCurrency(itemTotal)}</td>
+            </tr>
+        `;
+    });
+
+    // Add subtotal, shipping, and total rows
+    reviewItemsContainer.innerHTML += `
+        <tr class="border-top">
+            <td colspan="3" class="text-end fw-bold">Subtotal</td>
+            <td class="text-end">${formatCurrency(subtotalAmount)}</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="text-end fw-bold">Shipping</td>
+            <td class="text-end">${formatCurrency(shippingFee)}</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="text-end fw-bold">Total</td>
+            <td class="text-end fw-bold">${formatCurrency(totalAmount)}</td>
+        </tr>
     `;
-
-    orderSummaryElement.innerHTML = html;
 }
 
-// Tải thông tin người dùng
-async function loadUserProfile() {
-    const token = localStorage.getItem('accessToken');
+// Function to create order
+async function createOrder() {
+    // Show loading state
+    const placeOrderBtn = document.getElementById("placeOrderBtn");
+    const originalButtonText = placeOrderBtn.innerHTML;
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
 
     try {
-        const response = await fetch('/profile', {
+        const response = await fetch("/api/orders", {
+            method: "POST",
             headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            // Không xử lý lỗi ở đây, người dùng sẽ nhập thông tin từ đầu
-            return;
-        }
-
-        const profile = await response.json();
-
-        // Điền thông tin vào form
-        if (profile.full_name) {
-            document.getElementById('fullName').value = profile.full_name;
-        }
-
-        if (profile.email) {
-            document.getElementById('emailAddress').value = profile.email;
-        }
-
-        if (profile.phone) {
-            document.getElementById('phoneNumber').value = profile.phone;
-        }
-
-        if (profile.address) {
-            document.getElementById('address').value = profile.address;
-        }
-
-        if (profile.city) {
-            document.getElementById('city').value = profile.city;
-        }
-        
-        if (profile.district) {
-            document.getElementById('district').value = profile.district;
-        }
-        
-        if (profile.zip_code) {
-            document.getElementById('zipCode').value = profile.zip_code;
-        }
-        
-    } catch (error) {
-        console.error('Error:', error);
-        // Không xử lý lỗi ở đây, người dùng sẽ nhập thông tin từ đầu
-    }
-}
-
-// Lưu thông tin giao hàng
-function saveShippingInfo() {
-    orderData.shippingInfo = {
-        fullName: document.getElementById('fullName').value,
-        phoneNumber: document.getElementById('phoneNumber').value,
-        emailAddress: document.getElementById('emailAddress').value,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        district: document.getElementById('district').value,
-        zipCode: document.getElementById('zipCode').value,
-        notes: document.getElementById('shippingNotes').value
-    };
-    
-    // Nếu người dùng muốn lưu thông tin cho lần sau
-    if (document.getElementById('saveShippingInfo').checked) {
-        saveUserAddress();
-    }
-}
-
-// Lưu địa chỉ người dùng cho lần sau
-async function saveUserAddress() {
-    const token = localStorage.getItem('accessToken');
-    
-    try {
-        await fetch('/profile/address', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                district: document.getElementById('district').value,
-                zip_code: document.getElementById('zipCode').value,
-                phone: document.getElementById('phoneNumber').value
+                shipping_info: shippingInfo,
+                shipping_method: selectedShippingMethod,
+                payment_method: selectedPaymentMethod,
+                notes: orderNotes
             })
         });
-        
-    } catch (error) {
-        console.error('Error:', error);
-        // Không xử lý lỗi ở đây, tiếp tục quy trình thanh toán
-    }
-}
 
-// Lưu thông tin thanh toán
-function savePaymentInfo() {
-    // Lấy phương thức thanh toán
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    orderData.paymentMethod = paymentMethod;
-    
-    // Nếu thanh toán bằng thẻ, lưu thông tin thẻ
-    if (paymentMethod === 'card') {
-        orderData.cardDetails = {
-            cardNumber: document.getElementById('cardNumber').value,
-            expiryDate: document.getElementById('expiryDate').value,
-            cvv: document.getElementById('cvv').value,
-            cardholderName: document.getElementById('cardholderName').value
-        };
-    }
-}
+        if (response.ok) {
+            const orderData = await response.json();
 
-// Chuyển đến bước thanh toán
-function goToPaymentStep() {
-    // Cập nhật progress bar
-    document.getElementById('checkoutProgress').style.width = '66%';
-    document.getElementById('checkoutProgress').setAttribute('aria-valuenow', '66');
-    
-    // Chuyển tab
-    const paymentTab = document.querySelector('a[href="#payment"]');
-    const bsTab = new bootstrap.Tab(paymentTab);
-    bsTab.show();
-}
+            // Set order ID in confirmation page
+            document.getElementById("confirmationOrderId").textContent = orderData.id;
 
-// Quay lại bước shipping
-function goToShippingStep() {
-    // Cập nhật progress bar
-    document.getElementById('checkoutProgress').style.width = '33%';
-    document.getElementById('checkoutProgress').setAttribute('aria-valuenow', '33');
-    
-    // Chuyển tab
-    const shippingTab = document.querySelector('a[href="#shipping"]');
-    const bsTab = new bootstrap.Tab(shippingTab);
-    bsTab.show();
-}
+            // Set link for view order button
+            document.getElementById("viewOrderBtn").href = `orders.html?order=${orderData.id}`;
 
-// Chuyển đến bước xác nhận
-function goToConfirmationStep() {
-    // Cập nhật progress bar
-    document.getElementById('checkoutProgress').style.width = '100%';
-    document.getElementById('checkoutProgress').setAttribute('aria-valuenow', '100');
-    
-    // Chuyển tab
-    const confirmationTab = document.querySelector('a[href="#confirmation"]');
-    const bsTab = new bootstrap.Tab(confirmationTab);
-    bsTab.show();
-    
-    // Hiển thị tóm tắt đơn hàng trước khi xác nhận
-    displayOrderConfirmation();
-}
-
-// Quay lại bước payment
-function goToPaymentStep() {
-    // Cập nhật progress bar
-    document.getElementById('checkoutProgress').style.width = '66%';
-    document.getElementById('checkoutProgress').setAttribute('aria-valuenow', '66');
-    
-    // Chuyển tab
-    const paymentTab = document.querySelector('a[href="#payment"]');
-    const bsTab = new bootstrap.Tab(paymentTab);
-    bsTab.show();
-}
-
-// Hiển thị thông tin xác nhận đơn hàng
-function displayOrderConfirmation() {
-    // Hiển thị thông tin giao hàng
-    document.getElementById('shippingDetails').innerHTML = `
-        <p class="mb-1"><strong>${orderData.shippingInfo.fullName}</strong></p>
-        <p class="mb-1">${orderData.shippingInfo.address}</p>
-        <p class="mb-1">${orderData.shippingInfo.district}, ${orderData.shippingInfo.city} ${orderData.shippingInfo.zipCode || ''}</p>
-        <p class="mb-1">Phone: ${orderData.shippingInfo.phoneNumber}</p>
-        <p class="mb-1">Email: ${orderData.shippingInfo.emailAddress}</p>
-        ${orderData.shippingInfo.notes ? `<p class="mb-0">Notes: ${orderData.shippingInfo.notes}</p>` : ''}
-    `;
-    
-    // Hiển thị thông tin thanh toán
-    let paymentMethodText = '';
-    let paymentIcon = '';
-    
-    switch (orderData.paymentMethod) {
-        case 'cod':
-            paymentMethodText = 'Cash on Delivery';
-            paymentIcon = '<i class="fas fa-money-bill-wave me-2 text-success"></i>';
-            break;
-        case 'bank':
-            paymentMethodText = 'Bank Transfer';
-            paymentIcon = '<i class="fas fa-university me-2 text-primary"></i>';
-            break;
-        case 'card':
-            paymentMethodText = 'Credit/Debit Card';
-            paymentIcon = '<i class="fas fa-credit-card me-2 text-info"></i>';
-            break;
-        case 'momo':
-            paymentMethodText = 'MoMo Wallet';
-            paymentIcon = '<i class="fas fa-wallet me-2 text-danger"></i>';
-            break;
-    }
-    
-    document.getElementById('paymentDetails').innerHTML = `
-        <p class="mb-1">${paymentIcon} ${paymentMethodText}</p>
-        ${orderData.paymentMethod === 'card' ? 
-            `<p class="mb-0">Card ending in ${orderData.cardDetails.cardNumber.slice(-4)}</p>` : ''}
-    `;
-    
-    // Hiển thị danh sách sản phẩm
-    const orderItemsListElement = document.getElementById('orderItemsList');
-    orderItemsListElement.innerHTML = '';
-    
-    orderData.items.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>
-                <div class="d-flex align-items-center">
-                    <img src="${item.product.image || '/static/images/product-placeholder.jpg'}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;" alt="${item.product.name}">
-                    <div>
-                        <h6 class="mb-0">${item.product.name}</h6>
-                        <small class="text-muted">Size: ${item.size}, Color: ${item.color}</small>
-                    </div>
-                </div>
-            </td>
-            <td>${formatCurrency(item.product.price)}</td>
-            <td>${item.quantity}</td>
-            <td>${formatCurrency(item.product.price * item.quantity)}</td>
-        `;
-        
-        orderItemsListElement.appendChild(row);
-    });
-    
-    // Thêm hàng tổng tiền
-    const totalRow = document.createElement('tr');
-    totalRow.className = 'table-light';
-    totalRow.innerHTML = `
-        <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-        <td>${formatCurrency(orderData.subtotal)}</td>
-    `;
-    orderItemsListElement.appendChild(totalRow);
-    
-    // Thêm hàng phí shipping
-    const shippingRow = document.createElement('tr');
-    shippingRow.className = 'table-light';
-    shippingRow.innerHTML = `
-        <td colspan="3" class="text-end fw-bold">Shipping:</td>
-        <td>${formatCurrency(orderData.shipping)}</td>
-    `;
-    orderItemsListElement.appendChild(shippingRow);
-    
-    // Thêm hàng tổng đơn hàng
-    const orderTotalRow = document.createElement('tr');
-    orderTotalRow.className = 'table-light';
-    orderTotalRow.innerHTML = `
-        <td colspan="3" class="text-end fw-bold">Total:</td>
-        <td class="fw-bold">${formatCurrency(orderData.total)}</td>
-    `;
-    orderItemsListElement.appendChild(orderTotalRow);
-}
-
-// Đặt hàng
-async function placeOrder() {
-    const token = localStorage.getItem('accessToken');
-    
-    // Tạo payload cho API
-    const orderPayload = {
-        shipping_info: {
-            full_name: orderData.shippingInfo.fullName,
-            phone: orderData.shippingInfo.phoneNumber,
-            email: orderData.shippingInfo.emailAddress,
-            address: orderData.shippingInfo.address,
-            city: orderData.shippingInfo.city,
-            district: orderData.shippingInfo.district,
-            zip_code: orderData.shippingInfo.zipCode,
-            notes: orderData.shippingInfo.notes
-        },
-        payment_method: orderData.paymentMethod,
-    };
-    
-    try {
-        // Hiển thị nút đang xử lý
-        const placeOrderBtn = document.getElementById('placeOrderBtn');
-        placeOrderBtn.disabled = true;
-        placeOrderBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-        
-        // Gọi API đặt hàng
-        const response = await fetch('/orders', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(orderPayload)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to place order');
+            // Go to confirmation step
+            goToStep("confirmationStep");
+        } else {
+            const error = await response.json();
+            alert(error.detail || "Failed to create order. Please try again.");
         }
-        
-        // Lấy thông tin đơn hàng vừa tạo
-        const order = await response.json();
-        
-        // Hiển thị modal xác nhận đơn hàng
-        document.getElementById('orderConfirmationId').textContent = order.id;
-        const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
-        orderConfirmationModal.show();
-        
-        // Xóa giỏ hàng
-        clearCart();
-        
     } catch (error) {
-        console.error('Error:', error);
-        showAlert('Failed to place order. Please try again.', 'danger');
-        
-        // Reset nút đặt hàng
-        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        console.error("Error creating order:", error);
+        alert("An error occurred. Please try again.");
+    } finally {
+        // Restore button state
         placeOrderBtn.disabled = false;
-        placeOrderBtn.innerHTML = '<i class="fas fa-check me-1"></i> Place Order';
+        placeOrderBtn.innerHTML = originalButtonText;
     }
 }
 
-// Xóa giỏ hàng sau khi đặt hàng thành công
-async function clearCart() {
-    const token = localStorage.getItem('accessToken');
-    
+// Function to format currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+}
+
+// Function to check authentication and update UI
+async function checkAuthAndUpdateUI() {
     try {
-        await fetch('/cart', {
-            method: 'DELETE',
+        const token = localStorage.getItem("token");
+        if (!token) {
+            return null;
+        }
+
+        const response = await fetch("/api/users/me", {
+            method: "GET",
             headers: {
-                'Authorization': `Bearer ${token}`
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             }
         });
-        
-        // Cập nhật số lượng sản phẩm trong giỏ hàng (header)
-        updateCartCount();
-        
+
+        if (response.ok) {
+            const user = await response.json();
+
+            // Load categories
+            loadCategories();
+
+            // Update user dropdown in the header
+            const userDropdown = document.getElementById("userDropdown");
+            userDropdown.innerHTML = `
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdownMenu" role="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user"></i> ${user.username}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdownMenu">
+                    <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
+                    <li><a class="dropdown-item" href="orders.html">My Orders</a></li>
+                    ${user.role === "admin" ? '<li><a class="dropdown-item" href="admin/dashboard.html">Admin Dashboard</a></li>' : ''}
+                    ${user.role === "seller" ? '<li><a class="dropdown-item" href="seller/dashboard.html">Seller Dashboard</a></li>' : ''}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="logoutBtn">Logout</a></li>
+                </ul>
+            `;
+
+            // Add logout event listener
+            document.getElementById("logoutBtn").addEventListener("click", logout);
+
+            // Update cart count
+            fetchCartCount();
+
+            return user;
+        } else {
+            localStorage.removeItem("token");
+            return null;
+        }
     } catch (error) {
-        console.error('Error clearing cart:', error);
-        // Không xử lý lỗi ở đây vì đơn hàng đã được đặt thành công
+        console.error("Error checking authentication:", error);
+        return null;
     }
 }
 
-// Định dạng tiền tệ
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND'
-    }).format(amount);
+// Function to load categories
+async function loadCategories() {
+    try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+            const categories = await response.json();
+
+            const categoryMenu = document.getElementById("categoryMenu");
+            categoryMenu.innerHTML = "";
+
+            categories.forEach(category => {
+                categoryMenu.innerHTML += `
+                    <li><a class="dropdown-item" href="products.html?category=${encodeURIComponent(category.name)}">${category.name}</a></li>
+                `;
+            });
+        }
+    } catch (error) {
+        console.error("Error loading categories:", error);
+    }
 }
 
-// Hiển thị thông báo
-function showAlert(message, type = 'info') {
-    // Tạo một alert và append vào body
-    const alertElement = document.createElement('div');
-    alertElement.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    alertElement.style.top = '20px';
-    alertElement.style.right = '20px';
-    alertElement.style.zIndex = '9999';
-    
-    alertElement.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-    
-    document.body.appendChild(alertElement);
-    
-    // Tự động ẩn alert sau 5 giây
-    setTimeout(() => {
-        alertElement.classList.remove('show');
-        setTimeout(() => {
-            alertElement.remove();
-        }, 300);
-    }, 5000);
+// Function to update cart count badge
+async function fetchCartCount() {
+    try {
+        const response = await fetch("/api/cart", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+
+        if (response.ok) {
+            const cartData = await response.json();
+            document.getElementById("cartCount").textContent = cartData.items.length;
+        }
+    } catch (error) {
+        console.error("Error fetching cart count:", error);
+    }
+}
+
+// Function to logout
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "/login.html";
 }

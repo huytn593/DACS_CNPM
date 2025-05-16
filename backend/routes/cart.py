@@ -1,77 +1,69 @@
-from fastapi import APIRouter, Depends
+# In routes/cart_routes.py
+
+from fastapi import APIRouter, Depends, Body
+from typing import Dict, Any
+
+from ..controllers import cart_controller
 from ..models.cart import CartItemCreate, CartItemUpdate, CartResponse
 from ..utils.auth import get_current_user
 
-router = APIRouter(prefix="/api", tags=["cart"])
-
+router = APIRouter()
 
 @router.get("/cart", response_model=CartResponse)
-async def get_cart(current_user: dict = Depends(get_current_user)):
-    """
-    Lấy giỏ hàng của người dùng hiện tại
-    """
-    from ..controllers.cart_controller import get_user_cart
-    return await get_user_cart(current_user["id"])
+async def get_cart(current_user = Depends(get_current_user)):
+    """Get user's cart"""
+    return await cart_controller.get_user_cart(user_id=current_user["id"])
 
 
-@router.post("/cart/items")
-async def add_item_to_cart(item: CartItemCreate, current_user: dict = Depends(get_current_user)):
-    """
-    Thêm sản phẩm vào giỏ hàng
-    """
-    from ..controllers.cart_controller import get_user_cart, add_to_cart_func
-
-    # Gọi hàm thêm sản phẩm vào giỏ hàng
-    await add_to_cart_func(
+@router.post("/cart/add", response_model=CartResponse)
+async def add_to_cart(
+    item: CartItemCreate,
+    current_user = Depends(get_current_user)
+):
+    """Add item to cart"""
+    return await cart_controller.add_to_cart(
         user_id=current_user["id"],
-        product_id=item.product_id,
-        quantity=item.quantity,
-        size=item.size,
-        color=item.color
+        item_data=item
     )
 
-    # Trả về giỏ hàng cập nhật
-    return await get_user_cart(current_user["id"])
+
+@router.put("/cart/update", response_model=CartResponse)
+async def update_cart_item(
+    item_update: CartItemUpdate,
+    current_user = Depends(get_current_user)
+):
+    """Update cart item quantity"""
+    return await cart_controller.update_cart_item(
+        user_id=current_user["id"],
+        item_update=item_update
+    )
 
 
-@router.put("/cart/items/{item_id}")
-async def update_item_in_cart(item_id: str, item_update: CartItemUpdate,
-                              current_user: dict = Depends(get_current_user)):
-    """
-    Cập nhật số lượng sản phẩm trong giỏ hàng
-    """
-    from ..controllers.cart_controller import get_user_cart, update_cart_item_func
-
-    # Gọi hàm cập nhật sản phẩm trong giỏ hàng
-    await update_cart_item_func(current_user["id"], item_id, item_update)
-
-    # Trả về giỏ hàng cập nhật
-    return await get_user_cart(current_user["id"])
+@router.delete("/cart/remove", response_model=CartResponse)
+async def remove_from_cart(
+    item_id: str = Body(..., embed=True),
+    current_user = Depends(get_current_user)
+):
+    """Remove item from cart"""
+    return await cart_controller.remove_cart_item(
+        user_id=current_user["id"],
+        item_id=item_id
+    )
 
 
-@router.delete("/cart/items/{item_id}")
-async def delete_cart_item(item_id: str, current_user: dict = Depends(get_current_user)):
-    """
-    Xóa một sản phẩm khỏi giỏ hàng
-    """
-    from ..controllers.cart_controller import get_user_cart, remove_cart_item_func
-
-    # Gọi hàm xóa sản phẩm khỏi giỏ hàng
-    await remove_cart_item_func(current_user["id"], item_id)
-
-    # Trả về giỏ hàng cập nhật
-    return await get_user_cart(current_user["id"])
+@router.delete("/cart/clear", response_model=CartResponse)
+async def clear_cart(current_user = Depends(get_current_user)):
+    """Clear all items from cart"""
+    return await cart_controller.clear_cart(user_id=current_user["id"])
 
 
-@router.delete("/cart")
-async def empty_cart(current_user: dict = Depends(get_current_user)):
-    """
-    Xóa toàn bộ giỏ hàng
-    """
-    from ..controllers.cart_controller import get_user_cart, clear_cart_func
-
-    # Gọi hàm xóa toàn bộ giỏ hàng
-    await clear_cart_func(current_user["id"])
-
-    # Trả về giỏ hàng cập nhật (sẽ trống)
-    return await get_user_cart(current_user["id"])
+@router.post("/cart/promo", response_model=Dict[str, Any])
+async def apply_promo(
+    code: str = Body(..., embed=True),
+    current_user = Depends(get_current_user)
+):
+    """Apply promo code to cart"""
+    return await cart_controller.apply_promo_code(
+        user_id=current_user["id"],
+        code=code
+    )

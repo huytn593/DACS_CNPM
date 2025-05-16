@@ -47,7 +47,6 @@ def get_wishlist_collection() -> AsyncIOMotorCollection[Dict[str, Any]]:
 def get_category_collection() -> AsyncIOMotorCollection[Dict[str, Any]]:
     return database.categories
 
-
 # Thêm try/except blocks đầy đủ khi truy vấn MongoDB
 async def get_user_profile(user_id: str):
     try:

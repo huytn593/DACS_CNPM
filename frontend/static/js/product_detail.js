@@ -499,16 +499,629 @@ async function loadSimilarProducts(category, excludeId) {
 }
 
 // Khởi tạo trang
-document.addEventListener('DOMContentLoaded', () => {
-    // Tải thông tin chi tiết sản phẩm
-    loadProductDetail();
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize header and footer functionality from common.js
+    initCommonElements();
 
-    // Cập nhật trạng thái người dùng trong header
-    updateUserState();
+    // Get product ID from URL
+    const productId = getUrlParameter('id');
+    if (!productId) {
+        window.location.href = 'index.html';
+        return;
+    }
 
-    // Cập nhật số lượng sản phẩm trong giỏ hàng
-    updateCartCount();
+    // Load product details
+    loadProductDetail(productId);
 
-    // Load danh mục sản phẩm động
-    loadCategories();
+    // Set up event handlers
+    setupEventHandlers();
 });
+
+// Load product detail
+async function loadProductDetail(productId) {
+    try {
+        const response = await fetch(`/api/products/${productId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch product details');
+        }
+
+        const product = await response.json();
+
+        // Update page with product details
+        updateProductDetails(product);
+
+        // Load reviews
+        loadProductReviews(productId);
+
+        // Load related products
+        loadRelatedProducts(product.category, productId);
+
+        // Hide loading spinner and show product details
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('productDetail').style.display = 'block';
+        document.getElementById('reviewsSection').style.display = 'block';
+    } catch (error) {
+        console.error('Error loading product details:', error);
+        document.getElementById('loadingSpinner').innerHTML = `
+            <div class="alert alert-danger text-center">
+                <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                <p>Failed to load product details. Please try again later.</p>
+                <a href="index.html" class="btn btn-outline-dark mt-3">Return to Homepage</a>
+            </div>
+        `;
+    }
+}
+
+// Update product details in the UI
+function updateProductDetails(product) {
+    // Set title
+    document.title = `${product.name} - Fashion Store`;
+
+    // Update product name
+    document.getElementById('productName').textContent = product.name;
+
+    // Update price
+    const priceElement = document.getElementById('productPrice');
+    if (product.sale_price && product.sale_price < product.price) {
+        priceElement.innerHTML = `
+            <span class="text-danger">${formatCurrency(product.sale_price)}</span>
+            <span class="text-decoration-line-through text-muted ms-2">${formatCurrency(product.price)}</span>
+        `;
+    } else {
+        priceElement.textContent = formatCurrency(product.price);
+    }
+
+    // Update description
+    document.getElementById('productDescription').textContent = product.description;
+
+    // Update stock info
+    const stockElement = document.getElementById('stockInfo');
+    if (product.stock > 10) {
+        stockElement.innerHTML = '<span class="text-success">In Stock</span>';
+    } else if (product.stock > 0) {
+        stockElement.innerHTML = `<span class="text-warning">Only ${product.stock} left</span>`;
+    } else {
+        stockElement.innerHTML = '<span class="text-danger">Out of Stock</span>';
+        document.getElementById('addToCartBtn').disabled = true;
+    }
+
+    // Update images
+    updateProductImages(product);
+
+    // Update size options
+    updateSizeOptions(product.size || []);
+
+    // Update color options
+    updateColorOptions(product.color || []);
+
+    // Update rating
+    updateProductRating(product.rating || 0, product.reviews?.length || 0);
+}
+
+// Update product images
+function updateProductImages(product) {
+    const carouselInner = document.getElementById('productImageCarousel');
+    const thumbnailsContainer = document.getElementById('productThumbnails');
+
+    // Clear existing content
+    carouselInner.innerHTML = '';
+    thumbnailsContainer.innerHTML = '';
+
+    // Default image if no images provided
+    const images = product.images && product.images.length > 0
+        ? product.images
+        : ['/frontend/static/images/product-placeholder.jpg'];
+
+    // Add images to carousel
+    images.forEach((image, index) => {
+        const isActive = index === 0 ? 'active' : '';
+        carouselInner.innerHTML += `
+            <div class="carousel-item ${isActive}">
+                <img src="${image}" class="d-block w-100" alt="${product.name}" style="height: 400px; object-fit: contain;">
+            </div>
+        `;
+
+        // Add thumbnails
+        thumbnailsContainer.innerHTML += `
+            <div class="col-3">
+                <img src="${image}" class="img-thumbnail" alt="${product.name}" 
+                    onclick="document.querySelector('#productImages .carousel-item.active').classList.remove('active');
+                            document.querySelectorAll('#productImages .carousel-item')[${index}].classList.add('active');"
+                    style="cursor: pointer; height: 80px; object-fit: cover;">
+            </div>
+        `;
+    });
+}
+
+// Update size options
+function updateSizeOptions(sizes) {
+    const sizeOptionsContainer = document.getElementById('sizeOptions');
+    sizeOptionsContainer.innerHTML = '';
+
+    if (!sizes || sizes.length === 0) {
+        sizeOptionsContainer.innerHTML = '<p class="text-muted">No size options available</p>';
+        return;
+    }
+
+    sizes.forEach(size => {
+        sizeOptionsContainer.innerHTML += `
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="sizeOption" id="size-${size}" value="${size}">
+                <label class="form-check-label" for="size-${size}">${size}</label>
+            </div>
+        `;
+    });
+
+    // Select first size by default
+    const firstSizeInput = document.querySelector('input[name="sizeOption"]');
+    if (firstSizeInput) {
+        firstSizeInput.checked = true;
+    }
+}
+
+// Update color options
+function updateColorOptions(colors) {
+    const colorOptionsContainer = document.getElementById('colorOptions');
+    colorOptionsContainer.innerHTML = '';
+
+    if (!colors || colors.length === 0) {
+        colorOptionsContainer.innerHTML = '<p class="text-muted">No color options available</p>';
+        return;
+    }
+
+    colors.forEach(color => {
+        colorOptionsContainer.innerHTML += `
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="colorOption" id="color-${color}" value="${color}">
+                <label class="form-check-label" for="color-${color}">
+                    <span class="color-circle" style="background-color: ${color}"></span> ${color}
+                </label>
+            </div>
+        `;
+    });
+
+    // Select first color by default
+    const firstColorInput = document.querySelector('input[name="colorOption"]');
+    if (firstColorInput) {
+        firstColorInput.checked = true;
+    }
+}
+
+// Update product rating
+function updateProductRating(rating, reviewCount) {
+    const ratingElement = document.getElementById('productRating');
+    const reviewCountElement = document.getElementById('reviewCount');
+
+    ratingElement.innerHTML = generateStarRating(rating);
+    reviewCountElement.textContent = `(${reviewCount} reviews)`;
+}
+
+// Load product reviews
+async function loadProductReviews(productId) {
+    try {
+        const response = await fetch(`/api/products/${productId}/reviews`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch reviews');
+        }
+
+        const reviews = await response.json();
+        const reviewsListElement = document.getElementById('reviewsList');
+        const noReviewsElement = document.getElementById('noReviews');
+
+        if (reviews.length === 0) {
+            reviewsListElement.innerHTML = '';
+            noReviewsElement.style.display = 'block';
+            return;
+        }
+
+        noReviewsElement.style.display = 'none';
+        reviewsListElement.innerHTML = '';
+
+        reviews.forEach(review => {
+            reviewsListElement.innerHTML += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h6 class="mb-0">${review.user_name}</h6>
+                                <small class="text-muted">${formatDate(review.created_at)}</small>
+                            </div>
+                            <div class="text-warning">
+                                ${generateStarRating(review.rating)}
+                            </div>
+                        </div>
+                        <p class="card-text">${review.comment}</p>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        document.getElementById('reviewsList').innerHTML = `
+            <div class="alert alert-warning">
+                Failed to load reviews. Please try refreshing the page.
+            </div>
+        `;
+    }
+}
+
+// Load related products
+async function loadRelatedProducts(category, currentProductId) {
+    try {
+        const response = await fetch(`/api/products?category=${category}&limit=4`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch related products');
+        }
+
+        const data = await response.json();
+        const products = data.items || data;
+
+        // Filter out current product and limit to 4 items
+        const relatedProducts = products
+            .filter(product => product.id !== currentProductId)
+            .slice(0, 4);
+
+        const relatedProductsContainer = document.getElementById('relatedProducts');
+
+        if (relatedProducts.length === 0) {
+            relatedProductsContainer.innerHTML = '<p class="text-center text-muted">No related products found</p>';
+            return;
+        }
+
+        relatedProductsContainer.innerHTML = '';
+
+        relatedProducts.forEach(product => {
+            relatedProductsContainer.innerHTML += `
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="card h-100 product-card">
+                        <a href="product_detail.html?id=${product.id}" class="text-decoration-none">
+                            <img src="${product.image_url || '/frontend/static/images/product-placeholder.jpg'}" 
+                                class="card-img-top" alt="${product.name}"
+                                style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h6 class="card-title text-dark">${product.name}</h6>
+                                <p class="card-text text-primary">${formatCurrency(product.price)}</p>
+                                <div class="text-warning small">
+                                    ${generateStarRating(product.rating || 0)}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (error) {
+        console.error('Error loading related products:', error);
+        document.getElementById('relatedProducts').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    Failed to load related products.
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Set up event handlers
+function setupEventHandlers() {
+    // Quantity input handlers
+    const quantityInput = document.getElementById('quantityInput');
+    document.getElementById('decreaseQuantity').addEventListener('click', () => {
+        if (quantityInput.value > 1) {
+            quantityInput.value = parseInt(quantityInput.value) - 1;
+        }
+    });
+
+    document.getElementById('increaseQuantity').addEventListener('click', () => {
+        quantityInput.value = parseInt(quantityInput.value) + 1;
+    });
+
+    // Add to cart button handler
+    document.getElementById('addToCartBtn').addEventListener('click', addToCart);
+
+    // Report product button handler
+    document.getElementById('reportProductBtn').addEventListener('click', showReportModal);
+
+    // Review form handler
+    setupReviewForm();
+
+    // Report form handler
+    setupReportForm();
+}
+
+// Add to cart function
+async function addToCart() {
+    const productId = getUrlParameter('id');
+    const quantity = parseInt(document.getElementById('quantityInput').value);
+
+    // Get selected size and color
+    const selectedSize = document.querySelector('input[name="sizeOption"]:checked')?.value;
+    const selectedColor = document.querySelector('input[name="colorOption"]:checked')?.value;
+
+    try {
+        // Check if user is logged in
+        if (!isLoggedIn()) {
+            window.location.href = `login.html?returnUrl=product_detail.html?id=${productId}`;
+            return;
+        }
+
+        const response = await fetch('/api/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: quantity,
+                size: selectedSize,
+                color: selectedColor
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add product to cart');
+        }
+
+        // Show success message and update cart count
+        document.getElementById('addToCartSuccess').style.display = 'block';
+        document.getElementById('addToCartError').style.display = 'none';
+
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+            document.getElementById('addToCartSuccess').style.display = 'none';
+        }, 3000);
+
+        // Update cart count
+        updateCartCount();
+    } catch (error) {
+        console.error('Error adding product to cart:', error);
+        document.getElementById('addToCartSuccess').style.display = 'none';
+        document.getElementById('addToCartError').style.display = 'block';
+
+        // Hide error message after 3 seconds
+        setTimeout(() => {
+            document.getElementById('addToCartError').style.display = 'none';
+        }, 3000);
+    }
+}
+
+// Show report product modal
+function showReportModal() {
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+        document.getElementById('loginToReport').style.display = 'block';
+        document.getElementById('reportForm').style.display = 'none';
+    } else {
+        document.getElementById('loginToReport').style.display = 'none';
+        document.getElementById('reportForm').style.display = 'block';
+    }
+
+    // Show modal
+    const reportModal = new bootstrap.Modal(document.getElementById('reportProductModal'));
+    reportModal.show();
+}
+
+// Setup review form
+function setupReviewForm() {
+    // Set up star rating
+    const ratingStars = document.querySelectorAll('.rating-star');
+    ratingStars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            highlightStars(rating);
+        });
+
+        star.addEventListener('mouseout', function() {
+            const currentRating = parseInt(document.getElementById('ratingInput').value);
+            highlightStars(currentRating);
+        });
+
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            document.getElementById('ratingInput').value = rating;
+            highlightStars(rating);
+        });
+    });
+
+    // Check if user is logged in
+    if (isLoggedIn()) {
+        document.getElementById('loginToReview').style.display = 'none';
+        document.getElementById('reviewForm').style.display = 'block';
+
+        // Set up review submission
+        document.getElementById('submitReviewBtn').addEventListener('click', submitReview);
+    } else {
+        document.getElementById('loginToReview').style.display = 'block';
+        document.getElementById('reviewForm').style.display = 'none';
+
+        // Update login link with return URL
+        const loginLink = document.querySelector('#loginToReview a');
+        if (loginLink) {
+            loginLink.href = `login.html?returnUrl=product_detail.html?id=${getUrlParameter('id')}`;
+        }
+    }
+}
+
+// Highlight stars for rating
+function highlightStars(rating) {
+    const stars = document.querySelectorAll('.rating-star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+        } else {
+            star.classList.remove('fas');
+            star.classList.add('far');
+        }
+    });
+}
+
+// Submit review
+async function submitReview() {
+    const productId = getUrlParameter('id');
+    const rating = parseInt(document.getElementById('ratingInput').value);
+    const comment = document.getElementById('reviewComment').value;
+
+    // Validate input
+    if (rating === 0) {
+        showAlert('reviewWarning', 'Please select a rating.');
+        return;
+    }
+
+    if (!comment.trim()) {
+        showAlert('reviewWarning', 'Please write a review comment.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/products/${productId}/reviews`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                rating: rating,
+                comment: comment
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to submit review');
+        }
+
+        // Show success message
+        showAlert('reviewSuccess', 'Your review has been submitted successfully!');
+
+        // Clear form
+        document.getElementById('ratingInput').value = 0;
+        document.getElementById('reviewComment').value = '';
+        highlightStars(0);
+
+        // Reload reviews
+        loadProductReviews(productId);
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        showAlert('reviewError', error.message || 'Failed to submit review. Please try again.');
+    }
+}
+
+// Setup report form
+function setupReportForm() {
+    document.getElementById('submitReportBtn').addEventListener('click', submitReport);
+}
+
+// Submit report
+async function submitReport() {
+    const productId = getUrlParameter('id');
+    const reason = document.getElementById('reportReason').value;
+    const description = document.getElementById('reportDescription').value;
+
+    // Validate input
+    if (!reason) {
+        alert('Please select a reason for your report.');
+        return;
+    }
+
+    if (!description.trim()) {
+        alert('Please provide a description for your report.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/products/${productId}/report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                reason: reason,
+                description: description
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to submit report');
+        }
+
+        // Close modal
+        const reportModal = bootstrap.Modal.getInstance(document.getElementById('reportProductModal'));
+        reportModal.hide();
+
+        // Reset form
+        document.getElementById('reportReason').value = '';
+        document.getElementById('reportDescription').value = '';
+
+        // Show success message
+        showToast('Report submitted successfully. We will review it shortly.', 'success');
+    } catch (error) {
+        console.error('Error submitting report:', error);
+        alert('Failed to submit report. Please try again.');
+    }
+}
+
+// Helper function to show alert
+function showAlert(elementId, message) {
+    const alertElement = document.getElementById(elementId);
+    alertElement.textContent = message;
+    alertElement.style.display = 'block';
+
+    // Hide alert after 3 seconds
+    setTimeout(() => {
+        alertElement.style.display = 'none';
+    }, 3000);
+}
+
+// Generate star rating HTML
+function generateStarRating(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= rating) {
+            stars += '<i class="fas fa-star"></i>';
+        } else if (i - 0.5 <= rating) {
+            stars += '<i class="fas fa-star-half-alt"></i>';
+        } else {
+            stars += '<i class="far fa-star"></i>';
+        }
+    }
+    return stars;
+}
+
+// Format date helper function
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+// Helper function to get URL parameters
+function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    const results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
+
+// Check if user is logged in
+function isLoggedIn() {
+    return localStorage.getItem('token') !== null;
+}
+
+// Helper function to format currency - this might be defined in common.js
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        minimumFractionDigits: 0
+    }).format(amount);
+}
+
+
+

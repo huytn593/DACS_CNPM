@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - Fashion Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-dark text-white">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="/">Fashion Store</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown">
+                                    Categories
+                                </a>
+                                <ul class="dropdown-menu" id="categoryMenu">
+                                    <!-- Categories will be loaded dynamically -->
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="about.html">About Us</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.html">Contact</a>
+                            </li>
+                        </ul>
+                        <form class="d-flex me-2" id="searchForm">
+                            <input class="form-control me-2" type="search" id="searchInput" placeholder="Search products...">
+                            <button class="btn btn-outline-light" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="cart.html">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="badge bg-danger" id="cartCount">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown" id="userDropdown">
+                                <!-- Will be replaced with user info or login link -->
+                                <a class="nav-link" href="login.html">
+                                    <i class="fas fa-user"></i> Login
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Order History Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Your Order History</h2>
+                        <a href="profile.html" class="btn btn-outline-primary">
+                            <i class="fas fa-user me-2"></i>Back to Profile
+                        </a>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search orders..." id="orderSearchInput">
+                                        <button class="btn btn-outline-secondary" type="button" id="orderSearchBtn">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
+                                    <select class="form-select me-2" style="max-width: 150px;" id="orderStatusFilter">
+                                        <option value="">All Statuses</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="processing">Processing</option>
+<option value="shipped">Shipped</option>
+<option value="delivered">Delivered</option>
+<option value="cancelled">Cancelled</option>
+</select>
+
+<select class="form-select" style="max-width: 200px;" id="orderSortBy">
+    <option value="newest">Newest First</option>
+    <option value="oldest">Oldest First</option>
+    <option value="price_high">Price: High to Low</option>
+    <option value="price_low">Price: Low to High</option>
+</select>
+
+</div>
+</div>
+
+<div id="ordersLoadingSpinner" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading your orders...</p>
+</div>
+
+<div class="table-responsive" id="ordersTableContainer" style="display: none;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="ordersTable">
+            <!-- Orders will be loaded dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<div id="noOrdersFound" class="text-center py-5" style="display: none;">
+    <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+    <h5>No orders found</h5>
+    <p class="text-muted">You haven't placed any orders yet.</p>
+    <a href="/" class="btn btn-primary mt-3">Start Shopping</a>
+</div>
+
+<nav aria-label="Orders pagination" class="mt-4">
+    <ul class="pagination justify-content-center" id="ordersPagination">
+        <!-- Pagination will be created dynamically -->
+    </ul>
+</nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailModalLabel">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="orderDetailLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading order details...</p>
+                </div>
+                <div id="orderDetailContent" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Order Information</h6>
+                            <p class="mb-1"><strong>Order ID:</strong> <span id="orderDetailId"></span></p>
+                            <p class="mb-1"><strong>Date:</strong> <span id="orderDetailDate"></span></p>
+                            <p class="mb-1"><strong>Status:</strong> <span id="orderDetailStatus"></span></p>
+                            <p class="mb-1"><strong>Payment Method:</strong> <span id="orderDetailPayment"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Shipping Information</h6>
+                            <p class="mb-1"><strong>Name:</strong> <span id="orderDetailName"></span></p>
+                            <p class="mb-1"><strong>Address:</strong> <span id="orderDetailAddress"></span></p>
+                            <p class="mb-1"><strong>Phone:</strong> <span id="orderDetailPhone"></span></p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderDetailItems">
+                                <!-- Order items will be loaded dynamically -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td id="orderDetailSubtotal"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Shipping Fee:</strong></td>
+                                    <td id="orderDetailShipping"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td id="orderDetailTotal"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Order Timeline</h6>
+                        <div class="timeline" id="orderTimeline">
+                            <!-- Timeline will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5>Fashion Store</h5>
+                <p>Your one-stop destination for trendy fashion.</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="/" class="text-white">Home</a></li>
+                    <li><a href="about.html" class="text-white">About Us</a></li>
+                    <li><a href="contact.html" class="text-white">Contact</a></li>
+                    <li><a href="#" class="text-white">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Contact Us</h5>
+                <p>Email: info@fashionstore.com</p>
+                <p>Phone: +84 123 456 789</p>
+                <div class="social-links">
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <p>&copy; 2023 Fashion Store. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/orders.js"></script>
+</body>
+</html>

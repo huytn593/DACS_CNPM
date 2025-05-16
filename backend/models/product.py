@@ -39,6 +39,7 @@ class ReportCreate(BaseModel):
 
 
 class ReviewResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     product_id: str
     user_id: str
@@ -46,11 +47,9 @@ class ReviewResponse(BaseModel):
     comment: Optional[str]
     created_at: datetime
 
-    class Config:
-        model_config = ConfigDict(from_attributes=True)
-
 
 class ProductResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     name: str
     description: str
@@ -63,6 +62,3 @@ class ProductResponse(BaseModel):
     image_urls: List[str] = []
     created_at: datetime
     reviews: List[ReviewResponse] = []
-
-    class Config:
-        model_config = ConfigDict(from_attributes=True)
