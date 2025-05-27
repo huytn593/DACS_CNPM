@@ -7,24 +7,6 @@ from ..models.user import UserCreate, UserResponse, UserUpdate
 from ..utils.auth import get_password_hash, verify_password
 from ..utils.database import get_db
 
-async def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
-    """
-    Authenticate a user by email and password
-    """
-    db = get_db()
-
-    # Find user by email
-    user = await db.users.find_one({"email": email})
-
-    if not user:
-        return None
-
-    # Verify password
-    if not verify_password(password, user["hashed_password"]):
-        return None
-
-    return user
-
 
 async def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
     """
@@ -49,6 +31,14 @@ async def register_user(user: UserCreate) -> UserResponse:
             detail="Email already registered"
         )
 
+    # Check if username already exists
+    existing_username = await db.users.find_one({"username": user.username})
+    if existing_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already taken"
+        )
+
     # Create user ID
     user_id = str(uuid.uuid4())
 
@@ -59,6 +49,7 @@ async def register_user(user: UserCreate) -> UserResponse:
     new_user = {
         "id": user_id,
         "email": user.email,
+        "username": user.username,  # Ensure username is always set
         "full_name": user.full_name,
         "hashed_password": hashed_password,
         "role": user.role or "user",
@@ -76,6 +67,35 @@ async def register_user(user: UserCreate) -> UserResponse:
 
     return UserResponse(**user_response)
 
+
+async def authenticate_user(identifier: str, password: str) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    print(f"Attempting to authenticate user with identifier: {identifier}")
+
+    user = await db.users.find_one({"email": identifier})
+    if user:
+        print(f"User found by email: {identifier}")
+
+    if not user:
+        user = await db.users.find_one({"username": identifier})
+        if user:
+            print(f"User found by username: {identifier}")
+
+    if not user:
+        print(f"No user found with identifier: {identifier}")
+        return None
+
+    is_valid = verify_password(password, user["hashed_password"])
+    print(f"Password verification result: {is_valid}")
+
+    if not is_valid:
+        return None
+
+    # Đảm bảo luôn có trường 'id'
+    if "id" not in user and "_id" in user:
+        user["id"] = str(user["_id"])
+
+    return user
 
 async def update_profile(user_id: str, user_update: UserUpdate) -> UserResponse:
     """
@@ -103,6 +123,16 @@ async def update_profile(user_id: str, user_update: UserUpdate) -> UserResponse:
                 detail="Email already in use"
             )
         update_data["email"] = user_update.email
+
+    if user_update.username is not None:
+        # Check if username is not already taken by another user
+        existing_user = await db.users.find_one({"username": user_update.username})
+        if existing_user and existing_user["id"] != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
+        update_data["username"] = user_update.username
 
     if user_update.full_name is not None:
         update_data["full_name"] = user_update.full_name

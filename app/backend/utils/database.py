@@ -21,11 +21,17 @@ def get_db():
 async def connect_to_mongo():
     """Connect to MongoDB"""
     global client
-    client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
-
-    # Test connection
-    await client.admin.command('ping')
-    print("Connected to MongoDB")
+    try:
+        client = motor.motor_asyncio.AsyncIOMotorClient(
+            settings.MONGODB_URL,
+            serverSelectionTimeoutMS=5000
+        )
+        await client.admin.command('ping')
+        print("Connected to MongoDB")
+    except Exception as e:
+        print(f"Failed to connect to MongoDB: {e}")
+        # Thêm xử lý retry ở đây
+        raise
 
 
 async def close_mongo_connection():

@@ -8,7 +8,7 @@ from app.backend.utils.auth import get_current_user, seller_required
 router = APIRouter(tags=["products"])
 
 
-@router.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 async def create_product(
         product: ProductCreate = Body(...),
         current_user=Depends(seller_required)
@@ -16,7 +16,7 @@ async def create_product(
     return await product_controller.create_product(seller_id=current_user["id"], product_data=product)
 
 
-@router.get("/products", response_model=ProductListResponse)
+@router.get("/", response_model=ProductListResponse)
 async def get_products(
         category: Optional[str] = Query(None, description="Filter by category"),
         min_price: Optional[float] = Query(None, ge=0, description="Minimum price"),
@@ -52,7 +52,7 @@ async def get_products(
     )
 
 
-@router.get("/products/{product_id}", response_model=ProductResponse)
+@router.get("//{product_id}", response_model=ProductResponse)
 async def get_product(product_id: str = Path(...)):
     product = await product_controller.get_product(product_id)
     if not product:
@@ -63,7 +63,7 @@ async def get_product(product_id: str = Path(...)):
     return product
 
 
-@router.put("/products/{product_id}", response_model=ProductResponse)
+@router.put("//{product_id}", response_model=ProductResponse)
 async def update_product(
         product_id: str = Path(...),
         product_update: ProductUpdate = Body(...),
@@ -82,7 +82,7 @@ async def update_product(
     return updated_product
 
 
-@router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("//{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(
         product_id: str = Path(...),
         current_user=Depends(get_current_user)

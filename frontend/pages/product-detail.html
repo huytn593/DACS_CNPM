@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết sản phẩm - E-Commerce Shop</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="/pages/index.html" class="navbar-brand">E-Commerce</a>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a href="/pages/index.html" class="nav-link">Trang chủ</a></li>
+                    <li class="nav-item"><a href="/pages/categories.html" class="nav-link">Danh mục</a></li>
+                    <li class="nav-item" id="cart-container">
+                        <a href="/pages/cart.html" class="nav-link">Giỏ hàng (<span id="cart-count">0</span>)</a>
+                    </li>
+                    <li class="nav-item" id="auth-container">
+                        <a href="/pages/login.html" class="nav-link" id="login-link">Đăng nhập</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="product-detail">
+            <!-- Product details will be loaded dynamically -->
+            <div class="loading">Đang tải thông tin sản phẩm...</div>
+        </section>
+
+        <section id="product-reviews" class="mt-4">
+            <!-- Reviews will be loaded dynamically -->
+            <div class="loading">Đang tải đánh giá...</div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về chúng tôi</h3>
+                    <p>E-Commerce Shop cung cấp nền tảng mua sắm trực tuyến tin cậy và tiện lợi.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên hệ</h3>
+                    <p>Email: contact@ecommerce.com</p>
+                    <p>Điện thoại: (123) 456-7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Commerce Shop. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+</html>

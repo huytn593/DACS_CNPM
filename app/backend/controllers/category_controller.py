@@ -8,6 +8,50 @@ from ..models.category import CategoryCreate, CategoryUpdate, Category, Category
 from ..utils.database import get_db
 
 
+async def get_categories():
+    db = get_db()
+
+    # Get categories with product counts
+    pipeline = [
+        {"$lookup": {
+            "from": "products",
+            "localField": "_id",
+            "foreignField": "category_id",
+            "as": "products"
+        }},
+        {"$addFields": {
+            "product_count": {"$size": "$products"}
+        }},
+        {"$project": {
+            "_id": 1,
+            "id": {"$toString": "$_id"},  # Add id as string for convenience
+            "name": 1,
+            "description": 1,
+            "icon": 1,
+            "image": 1,
+            "status": 1,
+            "product_count": 1
+        }}
+    ]
+
+    categories = await db.categories.aggregate(pipeline).to_list(100)
+    return categories
+
+
+async def get_category(category_id: str):
+    db = get_db()
+
+    category = await db.categories.find_one({"_id": category_id})
+    if category:
+        # Add id field and make sure _id is serializable
+        category["id"] = str(category["_id"])
+        # Count products for this category
+        product_count = await db.products.count_documents({"category_id": category_id})
+        category["product_count"] = product_count
+
+    return category
+
+
 async def create_category(category_data: CategoryCreate) -> CategoryResponse:
     db = get_db()
 
@@ -26,7 +70,7 @@ async def create_category(category_data: CategoryCreate) -> CategoryResponse:
     # Create category
     category = Category(
         id=category_id,
-        **category_data.modeldump(),
+        **category_data.model_dump(),
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC)
     )
@@ -41,28 +85,6 @@ async def create_category(category_data: CategoryCreate) -> CategoryResponse:
         product_count=product_count,
         subcategories=[]
     )
-
-
-async def get_category(category_id: str) -> Optional[CategoryResponse]:
-    db = get_db()
-
-    # Get category
-    category = await db.categories.find_one({"id": category_id})
-    if not category:
-        return None
-
-    # Get product count
-    product_count = await db.products.count_documents({"category_id": category_id})
-
-    # Get subcategories
-    subcategories = await get_subcategories(category_id)
-
-    return CategoryResponse(
-        **category,
-        product_count=product_count,
-        subcategories=subcategories
-    )
-
 
 async def get_subcategories(parent_id: str) -> List[CategoryResponse]:
     db = get_db()

@@ -8,18 +8,18 @@ from app.backend.utils.auth import get_current_user
 
 router = APIRouter(tags=["cart"])
 
-@router.post("/cart", response_model=CartResponse)
+@router.post("/", response_model=CartResponse)
 async def add_to_cart(
     item: CartItemCreate = Body(...),
     current_user = Depends(get_current_user)
 ):
     return await cart_controller.add_to_cart(current_user["id"], item)
 
-@router.get("/cart", response_model=CartResponse)
+@router.get("/", response_model=CartResponse)
 async def get_cart(current_user = Depends(get_current_user)):
     return await cart_controller.get_cart(current_user["id"])
 
-@router.put("/cart/{item_id}", response_model=CartResponse)
+@router.put("/{item_id}", response_model=CartResponse)
 async def update_cart_item(
     item_id: str = Path(...),
     update_data: CartItemUpdate = Body(...),
@@ -27,18 +27,18 @@ async def update_cart_item(
 ):
     return await cart_controller.update_cart_item(current_user["id"], item_id, update_data)
 
-@router.delete("/cart/{item_id}", response_model=CartResponse)
+@router.delete("/{item_id}", response_model=CartResponse)
 async def remove_cart_item(
     item_id: str = Path(...),
     current_user = Depends(get_current_user)
 ):
     return await cart_controller.remove_cart_item(current_user["id"], item_id)
 
-@router.delete("/cart", response_model=CartResponse)
+@router.delete("/", response_model=CartResponse)
 async def clear_cart(current_user = Depends(get_current_user)):
     return await cart_controller.clear_cart(current_user["id"])
 
-@router.get("/cart/count", response_model=dict)
+@router.get("/count", response_model=dict)
 async def count_cart_items(current_user = Depends(get_current_user)):
     count = await cart_controller.count_cart_items(current_user["id"])
     return {"count": count}

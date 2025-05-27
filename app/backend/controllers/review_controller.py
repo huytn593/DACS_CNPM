@@ -72,23 +72,23 @@ async def update_product_rating(product_id: str) -> float:
 
     if not reviews:
         # If no reviews, set rating to 0
-        avg_rating = 0
+        average_rating = 0
     else:
         # Calculate average rating
-        avg_rating = sum(r["rating"] for r in reviews) / len(reviews)
+        average_rating = sum(r["rating"] for r in reviews) / len(reviews)
         # Round to 1 decimal place
-        avg_rating = round(avg_rating * 10) / 10
+        average_rating = round(average_rating * 10) / 10
 
     # Update product
     await db.products.update_one(
         {"id": product_id},
         {"$set": {
-            "avg_rating": avg_rating,
+            "average_rating": average_rating,
             "review_count": len(reviews)
         }}
     )
 
-    return avg_rating
+    return average_rating
 
 
 async def get_product_reviews(product_id: str, page: int = 1, size: int = 10) -> dict:

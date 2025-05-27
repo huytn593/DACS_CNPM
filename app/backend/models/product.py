@@ -1,19 +1,29 @@
 # app/backend/models/product.py
+from bson import ObjectId
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
 
 class ProductBase(BaseModel):
-    avg_rating: Optional[float] = 0
+    id: str = Field(default_factory=lambda: str(ObjectId()))
+    average_rating: Optional[float] = 0
     review_count: Optional[int] = 0
     name: str
     description: str
     price: float = Field(gt=0)
+    sale_price: Optional[float] = None
     stock: int = Field(ge=0)
+    categories: List[str]
+    seller_id: str
+    seller_name: str
+    attributes: Dict[str, List[str]] = {}
+    status: str = "active"
     category_id: Optional[str] = None
     sku: Optional[str] = None
     images: Optional[List[str]] = None
     active: bool = True
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
 class ProductCreate(ProductBase):
     pass

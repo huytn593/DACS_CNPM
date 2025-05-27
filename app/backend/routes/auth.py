@@ -1,4 +1,3 @@
-# app/backend/routes/auth.py
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
@@ -13,13 +12,11 @@ from app.config import settings
 
 router = APIRouter(tags=["auth"])
 
-
-@router.post("/auth/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(user: UserCreate = Body(...)):
     return await user_controller.create_user(user)
 
-
-@router.post("/auth/login", response_model=Dict[str, str])
+@router.post("/login", response_model=Dict[str, str])
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await auth_controller.authenticate_user(form_data.username, form_data.password)
 
@@ -32,19 +29,17 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id},
+        data={"sub": user["id"]},
         expires_delta=access_token_expires
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
 
-
-@router.get("/auth/me", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user=Depends(get_current_user)):
     return current_user
 
-
-@router.post("/auth/check-token", response_model=Dict[str, bool])
+@router.post("/check-token", response_model=Dict[str, bool])
 async def check_token_validity(token_data: Dict[str, str] = Body(...)):
     token = token_data.get("token")
     if not token:
@@ -62,11 +57,9 @@ async def check_token_validity(token_data: Dict[str, str] = Body(...)):
         user = await user_controller.get_user(user_id)
         return {"valid": user is not None}
     except (JWTError, ValueError, AttributeError):
-        # Specify exceptions that could occur during token validation
         return {"valid": False}
 
-
-@router.post("/auth/logout")
+@router.post("/logout")
 async def logout(_: Response):
     # Since JWT tokens are stateless, we can't invalidate them server-side
     # The client should remove the token from local storage

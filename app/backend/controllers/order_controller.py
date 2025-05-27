@@ -91,35 +91,29 @@ async def create_order(user_id: str, order_data: OrderCreate) -> OrderResponse:
     return OrderResponse(**order.model_dump())
 
 
-async def get_orders(user_id: Optional[str] = None) -> List[OrderResponse]:
+async def get_order(order_id: str, user_id: str = None):
     db = get_db()
 
-    # Build query
-    query = {}
-    if user_id:
-        query["user_id"] = user_id
+    # Find order and add user_name field
+    pipeline = [
+        {"$match": {"_id": order_id}},
+        {"$lookup": {
+            "from": "users",
+            "localField": "user_id",
+            "foreignField": "_id",
+            "as": "user"
+        }},
+        {"$addFields": {
+            "user_name": {"$arrayElemAt": ["$user.name", 0]}
+        }},
+        {"$project": {"user": 0}}  # Remove user array
+    ]
 
-    # Get orders
-    cursor = db.orders.find(query).sort("created_at", -1)
-    orders = await cursor.to_list(length=100)
-
-    return [OrderResponse(**order) for order in orders]
-
-
-async def get_order(order_id: str, user_id: Optional[str] = None) -> Optional[OrderResponse]:
-    db = get_db()
-
-    # Build query
-    query = {"id": order_id}
-    if user_id:
-        query["user_id"] = user_id
-
-    # Get order
-    order = await db.orders.find_one(query)
+    order = await db.orders.aggregate(pipeline).to_list(1)
     if not order:
         return None
 
-    return OrderResponse(**order)
+    return order[0]
 
 
 async def update_order(order_id: str, order_update: OrderUpdate, user_id: Optional[str] = None) -> Optional[

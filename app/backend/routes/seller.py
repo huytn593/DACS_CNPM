@@ -46,7 +46,10 @@ async def create_seller_product(
         category_id=category_id,
         sku=sku,
         images=image_paths,
-        active=active
+        active=active,
+        categories=[category_id] if category_id else [],
+        seller_id=current_user["id"],
+        seller_name=current_user.get("full_name", current_user["username"])
     )
 
     # Create product
@@ -137,7 +140,7 @@ async def delete_seller_product(
 
 
 @router.get("/orders", response_model=List[OrderResponse])
-async def get_seller_orders(current_user=Depends(seller_required)):
+async def seller_orders_list(current_user=Depends(seller_required)):
     return await order_controller.get_seller_orders(current_user["id"])
 
 

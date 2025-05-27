@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang quản trị - E-Commerce Shop</title>
+    <link rel="stylesheet" href=/assets/css/style.css>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="navbar-brand">E-Commerce</a>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Trang chủ</a></li>
+                    <li class="nav-item"><a href="categories.html" class="nav-link">Danh mục</a></li>
+                    <li class="nav-item" id="cart-container">
+                        <a href="cart.html" class="nav-link">Giỏ hàng (<span id="cart-count">0</span>)</a>
+                    </li>
+                    <li class="nav-item" id="auth-container">
+                        <a href="login.html" class="nav-link" id="login-link">Đăng nhập</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="dashboard-section">
+            <h1>Trang quản trị</h1>
+
+            <div id="admin-dashboard">
+                <!-- Dashboard stats will be loaded dynamically -->
+                <div class="loading">Đang tải thống kê...</div>
+            </div>
+
+            <div class="admin-tabs mt-4">
+                <ul class="tabs-nav">
+                    <li class="tab-item active" data-tab="users">Quản lý người dùng</li>
+                    <li class="tab-item" data-tab="orders">Quản lý đơn hàng</li>
+                    <li class="tab-item" data-tab="reports">Quản lý báo cáo</li>
+                    <li class="tab-item" data-tab="categories">Quản lý danh mục</li>
+                </ul>
+
+                <div class="tab-content">
+                    <div id="admin-users" class="tab-pane active">
+                        <!-- Users management will be loaded dynamically -->
+                        <div class="loading">Đang tải danh sách người dùng...</div>
+                    </div>
+
+                    <div id="admin-orders" class="tab-pane">
+                        <!-- Orders management will be loaded dynamically -->
+                        <div class="loading">Đang tải danh sách đơn hàng...</div>
+                    </div>
+
+                    <div id="admin-reports" class="tab-pane">
+                        <!-- Reports management will be loaded dynamically -->
+                        <div class="loading">Đang tải danh sách báo cáo...</div>
+                    </div>
+
+                    <div id="admin-categories" class="tab-pane">
+                        <!-- Categories management will be loaded dynamically -->
+                        <div class="loading">Đang tải danh mục sản phẩm...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về chúng tôi</h3>
+                    <p>E-Commerce Shop cung cấp nền tảng mua sắm trực tuyến tin cậy và tiện lợi.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên hệ</h3>
+                    <p>Email: contact@ecommerce.com</p>
+                    <p>Điện thoại: (123) 456-7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Commerce Shop. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>

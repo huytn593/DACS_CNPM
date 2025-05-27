@@ -12,16 +12,16 @@ from ..utils.database import get_db
 # Define ProductSearchParams class here since it's missing from the models
 class ProductSearchParams:
     def __init__(
-        self,
-        query: Optional[str] = None,
-        category_id: Optional[str] = None,
-        min_price: Optional[float] = None,
-        max_price: Optional[float] = None,
-        active: Optional[bool] = True,
-        in_stock: Optional[bool] = True,
-        sort_by: Optional[str] = "newest",
-        page: int = 1,
-        size: int = 20
+            self,
+            query: Optional[str] = None,
+            category_id: Optional[str] = None,
+            min_price: Optional[float] = None,
+            max_price: Optional[float] = None,
+            active: Optional[bool] = True,
+            in_stock: Optional[bool] = True,
+            sort_by: Optional[str] = "newest",
+            page: int = 1,
+            size: int = 20
     ):
         self.query = query
         self.category_id = category_id
@@ -34,9 +34,12 @@ class ProductSearchParams:
         self.size = size
 
 
-async def create_product(product_id: str,product_data: ProductCreate, seller_id: str) -> ProductResponse:
+async def create_product(product_data: ProductCreate, seller_id: str) -> ProductResponse:
     db = get_db()
 
+    product_id = str(uuid.uuid4())
+
+    # Kiểm tra stock thấp để gửi cảnh báo nếu cần
     if product_data.stock is not None and product_data.stock <= 5:
         await stock_alert_controller.check_stock_level(product_id, product_data.stock)
 
@@ -49,14 +52,15 @@ async def create_product(product_id: str,product_data: ProductCreate, seller_id:
                 detail="Category not found"
             )
 
-    # Create product ID
-    product_id = str(uuid.uuid4())
+    # Loại bỏ các trường sẽ truyền trực tiếp
+    data = product_data.model_dump()
+    for key in ["id", "seller_id", "average_rating", "review_count", "created_at", "updated_at"]:
+        data.pop(key, None)
 
-    # Create product
     product = Product(
         id=product_id,
         seller_id=seller_id,
-        **product_data.model_dump(),
+        **data,
         average_rating=0,
         review_count=0,
         created_at=datetime.now(UTC),
@@ -83,38 +87,36 @@ async def create_product(product_id: str,product_data: ProductCreate, seller_id:
     return ProductResponse(**product_dict)
 
 
-async def get_product(product_id: str) -> Optional[ProductResponse]:
+async def get_product(product_id: str):
     db = get_db()
 
-    # Get product
-    product = await db.products.find_one({"id": product_id})
+    # Find product with seller information
+    pipeline = [
+        {"$match": {"id": product_id}},
+        {"$lookup": {
+            "from": "users",
+            "localField": "seller_id",
+            "foreignField": "id",
+            "as": "seller"
+        }},
+        {"$addFields": {
+            "seller_name": {"$arrayElemAt": ["$seller.name", 0]}
+        }},
+        {"$project": {"seller": 0}}
+    ]
+
+    product = await db.products.aggregate(pipeline).to_list(1)
     if not product:
         return None
 
-    # Get seller name
-    seller_id = product.get("seller_id")
-    seller_name = None
-    if seller_id:
-        seller = await db.users.find_one({"id": seller_id})
-        seller_name = seller.get("full_name") if seller else None
-
-    # Get category name
-    category_id = product.get("category_id")
-    category_name = None
-    if category_id:
-        category = await db.categories.find_one({"id": category_id})
-        category_name = category.get("name") if category else None
-
-    # Add additional fields to response
-    product["seller_name"] = seller_name
-    product["category_name"] = category_name
-
-    return ProductResponse(**product)
+    return product[0]
 
 
-async def update_product(update_data, product_id: str, product_update: ProductUpdate) -> Optional[ProductResponse]:
+async def update_product(product_id: str, product_update: ProductUpdate) -> Optional[ProductResponse]:
     db = get_db()
 
+    # Prepare update data
+    update_data = {k: v for k, v in product_update.model_dump().items() if v is not None}
     if "stock" in update_data and update_data["stock"] is not None:
         await stock_alert_controller.check_stock_level(product_id, update_data["stock"])
 
@@ -132,8 +134,6 @@ async def update_product(update_data, product_id: str, product_update: ProductUp
                 detail="Category not found"
             )
 
-    # Prepare update data
-    update_data = {k: v for k, v in product_update.model_dump().items() if v is not None}
     update_data["updated_at"] = datetime.now(UTC)
 
     # Update product

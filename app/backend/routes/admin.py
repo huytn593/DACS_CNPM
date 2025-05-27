@@ -1,13 +1,56 @@
 # app/backend/routes/admin.py
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Path, Body, HTTPException, status, Query
 from typing import List, Dict, Any
 
 from app.backend.controllers import admin_controller, user_controller
+from app.backend.utils import database
 from app.backend.utils.auth import admin_required
 from app.backend.models.user import UserResponse, UserUpdate
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
+async def get_site_stats():
+    """Get site-wide statistics for admin dashboard"""
+    db = database.get_db()
+
+    # Get counts from collections
+    total_users = await db.users.count_documents({})
+    total_products = await db.products.count_documents({})
+    total_orders = await db.orders.count_documents({})
+    pending_reports = await db.reports.count_documents({"status": "pending"})
+
+    # Get revenue metrics
+    revenue_pipeline = [
+        {"$match": {"status": {"$nin": ["cancelled"]}}},
+        {"$group": {
+            "_id": None,
+            "total_revenue": {"$sum": "$total"},
+            "monthly_revenue": {
+                "$sum": {
+                    "$cond": [
+                        {"$gte": ["$created_at", datetime.utcnow() - timedelta(days=30)]},
+                        "$total",
+                        0
+                    ]
+                }
+            }
+        }}
+    ]
+    revenue_data = await db.orders.aggregate(revenue_pipeline).to_list(1)
+
+    # Format response
+    stats = {
+        "total_users": total_users,
+        "total_products": total_products,
+        "total_orders": total_orders,
+        "pending_reports": pending_reports,
+        "total_revenue": revenue_data[0]["total_revenue"] if revenue_data else 0,
+        "monthly_revenue": revenue_data[0]["monthly_revenue"] if revenue_data else 0,
+        # Add other statistics as needed
+    }
+
+    return stats
 
 @router.get("/stats", response_model=Dict[str, Any])
 async def get_admin_stats(_=Depends(admin_required)):
