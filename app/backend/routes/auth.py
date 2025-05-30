@@ -1,7 +1,9 @@
+# app/backend/routes/auth.py
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
-from typing import Dict
+from typing import Dict, Any
+from pydantic import BaseModel
 
 from jose import JWTError
 
@@ -12,18 +14,25 @@ from app.config import settings
 
 router = APIRouter(tags=["auth"])
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: Dict[str, Any]
+
+
+@router.post("/auth/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(user: UserCreate = Body(...)):
     return await user_controller.create_user(user)
 
-@router.post("/login", response_model=Dict[str, str])
+
+@router.post("/auth/login", response_model=TokenResponse)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await auth_controller.authenticate_user(form_data.username, form_data.password)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -33,13 +42,30 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         expires_delta=access_token_expires
     )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Create a user response object without sensitive data
+    user_response = {
+        "id": user["id"],
+        "username": user.get("username", ""),
+        "email": user["email"],
+        "full_name": user["full_name"],
+        "role": user["role"],
+        "phone": user.get("phone", ""),
+        "address": user.get("address", "")
+    }
 
-@router.get("/me", response_model=UserResponse)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user_response
+    }
+
+
+@router.get("/auth/me", response_model=UserResponse)
 async def get_current_user_info(current_user=Depends(get_current_user)):
     return current_user
 
-@router.post("/check-token", response_model=Dict[str, bool])
+
+@router.post("/auth/check-token", response_model=Dict[str, bool])
 async def check_token_validity(token_data: Dict[str, str] = Body(...)):
     token = token_data.get("token")
     if not token:
@@ -57,10 +83,12 @@ async def check_token_validity(token_data: Dict[str, str] = Body(...)):
         user = await user_controller.get_user(user_id)
         return {"valid": user is not None}
     except (JWTError, ValueError, AttributeError):
+        # Specify exceptions that could occur during token validation
         return {"valid": False}
 
-@router.post("/logout")
+
+@router.post("/auth/logout")
 async def logout(_: Response):
     # Since JWT tokens are stateless, we can't invalidate them server-side
     # The client should remove the token from local storage
-    return {"message": "Logged out successfully"}
+    return {"detail": "Successfully logged out"}

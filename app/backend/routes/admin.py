@@ -1,5 +1,5 @@
 # app/backend/routes/admin.py
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from fastapi import APIRouter, Depends, Path, Body, HTTPException, status, Query
 from typing import List, Dict, Any
 
@@ -7,6 +7,13 @@ from app.backend.controllers import admin_controller, user_controller
 from app.backend.utils import database
 from app.backend.utils.auth import admin_required
 from app.backend.models.user import UserResponse, UserUpdate
+from app.backend.controllers.stats_controller import (
+    dashboard_daily_orders,
+    dashboard_top_products,
+    dashboard_new_users,
+    dashboard_revenue,
+    dashboard_inventory
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -29,7 +36,7 @@ async def get_site_stats():
             "monthly_revenue": {
                 "$sum": {
                     "$cond": [
-                        {"$gte": ["$created_at", datetime.utcnow() - timedelta(days=30)]},
+                        {"$gte": ["$created_at", datetime.now(UTC) - timedelta(days=30)]},
                         "$total",
                         0
                     ]
@@ -138,3 +145,23 @@ async def delete_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
+
+@router.get("/dashboard/daily-orders")
+async def api_dashboard_daily_orders(days: int = 30):
+    return await dashboard_daily_orders(days)
+
+@router.get("/dashboard/top-products")
+async def api_dashboard_top_products(limit: int = 5):
+    return await dashboard_top_products(limit)
+
+@router.get("/dashboard/new-users")
+async def api_dashboard_new_users(months: int = 6):
+    return await dashboard_new_users(months)
+
+@router.get("/dashboard/revenue")
+async def api_dashboard_revenue(days: int = 30):
+    return await dashboard_revenue(days)
+
+@router.get("/dashboard/inventory")
+async def api_dashboard_inventory():
+    return await dashboard_inventory()

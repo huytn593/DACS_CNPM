@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa sản phẩm - E-Commerce Shop</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/seller.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="../index.html" class="navbar-brand">E-Commerce</a>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a href="../index.html" class="nav-link">Trang chủ</a></li>
+                    <li class="nav-item"><a href="../categories.html" class="nav-link">Danh mục</a></li>
+                    <li class="nav-item" id="cart-container">
+                        <a href="../cart.html" class="nav-link">Giỏ hàng (<span id="cart-count">0</span>)</a>
+                    </li>
+                    <li class="nav-item" id="auth-container">
+                        <!-- Auth container will be filled dynamically -->
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="seller-header">
+            <h1>Sửa sản phẩm</h1>
+            <a href="products.html" class="btn btn-outline">Quay lại danh sách sản phẩm</a>
+        </div>
+
+        <div class="seller-nav">
+            <ul class="seller-menu">
+                <li class="seller-menu-item"><a href="../seller-dashboard.html">Dashboard</a></li>
+                <li class="seller-menu-item active"><a href="products.html">Sản phẩm của tôi</a></li>
+                <li class="seller-menu-item"><a href="orders.html">Đơn hàng</a></li>
+            </ul>
+        </div>
+
+        <div class="seller-content">
+            <form id="edit-product-form" class="product-form">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="name">Tên sản phẩm <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="sku">Mã SKU</label>
+                        <input type="text" id="sku" name="sku" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="price">Giá (VNĐ) <span class="required">*</span></label>
+                        <input type="number" id="price" name="price" class="form-control" min="0" step="1000" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="stock">Số lượng trong kho <span class="required">*</span></label>
+                        <input type="number" id="stock" name="stock" class="form-control" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category_id">Danh mục</label>
+                    <select id="category_id" name="category_id" class="form-control">
+                        <option value="">-- Chọn danh mục --</option>
+                        <!-- Categories will be loaded dynamically -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Mô tả sản phẩm <span class="required">*</span></label>
+                    <textarea id="description" name="description" class="form-control" rows="5" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Hình ảnh sản phẩm</label>
+                    <div class="image-upload-container">
+                        <div class="image-preview-container" id="image-preview-container">
+                            <!-- Image previews will be added here -->
+                            <div class="image-upload-placeholder">
+                                <i class="fa fa-image"></i>
+                                <p>Chưa có hình ảnh</p>
+                            </div>
+                        </div>
+                        <div class="image-upload-controls">
+                            <div class="form-group">
+                                <label for="image-url">URL hình ảnh</label>
+                                <div class="input-group">
+                                    <input type="text" id="image-url" class="form-control" placeholder="Nhập URL hình ảnh">
+                                    <button type="button" id="add-image-btn" class="btn">Thêm</button>
+                                </div>
+                            </div>
+                            <p class="help-text">Hỗ trợ định dạng: JPG, PNG, GIF. Kích thước tối đa: 5MB.</p>
+                        </div>
+                        <input type="hidden" id="images" name="images" value="[]">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" id="active" name="active" class="form-check-input" checked>
+                        <label for="active" class="form-check-label">Sản phẩm đang hoạt động</label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="reset-form-btn" class="btn btn-outline">Nhập lại</button>
+                    <button type="submit" class="btn">Cập nhật sản phẩm</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về chúng tôi</h3>
+                    <p>E-Commerce Shop cung cấp nền tảng mua sắm trực tuyến tin cậy và tiện lợi.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên hệ</h3>
+                    <p>Email: contact@ecommerce.com</p>
+                    <p>Điện thoại: (123) 456-7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Commerce Shop. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="../../assets/js/main.js"></script>
+</body>
+</html> 

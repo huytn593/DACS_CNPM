@@ -4,7 +4,7 @@ from typing import List
 
 from app.backend.models.stock_alert import StockAlertResponse
 from app.backend.controllers import stock_alert_controller
-from app.backend.utils.auth import get_current_user, seller_required
+from app.backend.utils.auth import seller_required
 from app.backend.utils.database import get_db
 
 router = APIRouter(tags=["stock_alerts"])

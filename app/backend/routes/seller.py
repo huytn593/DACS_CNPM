@@ -11,6 +11,12 @@ from app.backend.utils.auth import seller_required
 from app.backend.models.order import OrderResponse
 from app.backend.controllers import order_controller
 from app.backend.utils.file_upload import save_upload_files
+from app.backend.controllers.stats_controller import (
+    dashboard_daily_orders,
+    dashboard_top_products,
+    dashboard_revenue,
+    dashboard_inventory
+)
 
 router = APIRouter(prefix="/seller", tags=["seller"])
 
@@ -47,9 +53,9 @@ async def create_seller_product(
         sku=sku,
         images=image_paths,
         active=active,
-        categories=[category_id] if category_id else [],
-        seller_id=current_user["id"],
-        seller_name=current_user.get("full_name", current_user["username"])
+        categories=[category_id] if category_id else [],  # Add category to categories list
+        seller_id=current_user["id"],  # Add seller ID
+        seller_name=current_user["full_name"]  # Add seller name
     )
 
     # Create product
@@ -140,7 +146,7 @@ async def delete_seller_product(
 
 
 @router.get("/orders", response_model=List[OrderResponse])
-async def seller_orders_list(current_user=Depends(seller_required)):
+async def get_seller_orders(current_user=Depends(seller_required)):
     return await order_controller.get_seller_orders(current_user["id"])
 
 
@@ -251,3 +257,23 @@ async def get_revenue(current_user=Depends(seller_required)):
         "total_revenue": total_revenue,
         "revenue_trend": revenue_trend
     }
+
+
+@router.get("/dashboard/daily-orders")
+async def api_dashboard_daily_orders(days: int = 30):
+    return await dashboard_daily_orders(days)
+
+
+@router.get("/dashboard/top-products")
+async def api_dashboard_top_products(limit: int = 5):
+    return await dashboard_top_products(limit)
+
+
+@router.get("/dashboard/revenue")
+async def api_dashboard_revenue(days: int = 30):
+    return await dashboard_revenue(days)
+
+
+@router.get("/dashboard/inventory")
+async def api_dashboard_inventory():
+    return await dashboard_inventory()

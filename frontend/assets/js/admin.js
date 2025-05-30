@@ -1,123 +1,241 @@
 // /frontend/assets/js/admin.js
-import { api } from './api.js';
+import api from './api.js';
+import auth from './auth.js';
+import { renderOrdersChart, renderRevenueChart, renderTopProducts, renderInventoryStatus, renderRecentOrders } from './dashboard-ui.js';
 
-export const adminService = {
-    // Get all users with pagination
-    async getUsers(page = 1, size = 10) {
-        try {
-            return await api.getAllUsers(page, size);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            throw error;
+// SCHEMA TYPEDEFS (JSDoc)
+/**
+ * @typedef {Object} CategoryCreate
+ * @property {string} name
+ * @property {string|null} description
+ * @property {string|null} parent_id
+ * @property {string|null} image
+ */
+/**
+ * @typedef {Object} CategoryUpdate
+ * @property {string|null} name
+ * @property {string|null} description
+ * @property {string|null} parent_id
+ * @property {string|null} image
+ */
+/**
+ * @typedef {Object} CategoryResponse
+ * @property {string} name
+ * @property {string|null} description
+ * @property {string|null} parent_id
+ * @property {string|null} image
+ * @property {string} id
+ * @property {string} created_at
+ * @property {string} updated_at
+ * @property {number|null} [product_count=0]
+ * @property {Array<any>|null} [subcategories=[]]
+ */
+/**
+ * @typedef {Object} ReportCreate
+ * @property {string} product_id
+ * @property {string} description
+ */
+/**
+ * @typedef {Object} ReportResponse
+ * @property {string} id
+ * @property {string} product_id
+ * @property {string} user_id
+ * @property {string} description
+ * @property {string} status
+ * @property {string|null} admin_notes
+ * @property {string} created_at
+ * @property {string} updated_at
+ * @property {string|null} product_name
+ * @property {string|null} product_image
+ * @property {string|null} reporter_name
+ */
+
+class Admin {
+    constructor() {
+        this.init();
+    }
+
+    async init() {
+        if (!auth.isAuthenticated() || auth.getCurrentUser().role !== 'admin') {
+            window.location.href = '../pages/login.html';
+            return;
         }
-    },
 
-    // Get all orders with pagination
-    async getOrders(page = 1, size = 10) {
+        await this.loadAdminDashboard();
+        this.setupEventListeners();
+    }
+
+    async loadAdminDashboard() {
         try {
-            return await api.getAllOrders(page, size);
+            const stats = await api.getAdminStatistics();
+            
+            // Render các biểu đồ và thống kê
+            renderOrdersChart(stats.orders_chart);
+            renderRevenueChart(stats.revenue_chart);
+            renderTopProducts(stats.top_products);
+            renderInventoryStatus(stats.inventory_status);
+            renderRecentOrders(stats.recent_orders);
+
+            // Render thông tin tổng quan
+            const overviewContainer = document.getElementById('admin-overview');
+            if (overviewContainer) {
+                overviewContainer.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tổng doanh thu</h5>
+                                    <h3 class="card-text">${stats.total_revenue.toLocaleString('vi-VN')}đ</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tổng đơn hàng</h5>
+                                    <h3 class="card-text">${stats.total_orders}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tổng người dùng</h5>
+                                    <h3 class="card-text">${stats.total_users}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tổng sản phẩm</h5>
+                                    <h3 class="card-text">${stats.total_products}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         } catch (error) {
-            console.error('Error fetching orders:', error);
-            throw error;
-        }
-    },
-
-    // Get all reports with pagination
-    async getReports(page = 1, size = 10) {
-        try {
-            return await api.getAllReports(page, size);
-        } catch (error) {
-            console.error('Error fetching reports:', error);
-            throw error;
-        }
-    },
-
-    // Update report status
-    async updateReportStatus(reportId, status, adminNotes = null) {
-        try {
-            return await api.updateReportStatus(reportId, status, adminNotes);
-        } catch (error) {
-            console.error('Error updating report:', error);
-            throw error;
-        }
-    },
-
-    // Create a new category
-    async createCategory(categoryData) {
-        try {
-            return await api.createCategory({
-                name: categoryData.name,
-                description: categoryData.description,
-                parent_id: categoryData.parent_id,
-                image: categoryData.image
-            });
-        } catch (error) {
-            console.error('Error creating category:', error);
-            throw error;
-        }
-    },
-
-    // Update an existing category
-    async updateCategory(categoryId, categoryData) {
-        try {
-            const updateData = {};
-
-            // Only include fields that are provided
-            if (categoryData.name !== undefined) updateData.name = categoryData.name;
-            if (categoryData.description !== undefined) updateData.description = categoryData.description;
-            if (categoryData.parent_id !== undefined) updateData.parent_id = categoryData.parent_id;
-            if (categoryData.image !== undefined) updateData.image = categoryData.image;
-
-            return await api.updateCategory(categoryId, updateData);
-        } catch (error) {
-            console.error('Error updating category:', error);
-            throw error;
-        }
-    },
-
-    // Get dashboard statistics
-    async getDashboardStats() {
-        try {
-            const users = await this.getUsers(1, 100);
-            const orders = await this.getOrders(1, 100);
-            const reports = await this.getReports(1, 100);
-
-            // Calculate statistics
-            const totalUsers = users.total || 0;
-            const totalOrders = orders.length || 0;
-            const totalRevenue = orders
-                .filter(order => order.status === 'delivered')
-                .reduce((sum, order) => sum + order.total_amount, 0);
-            const commissionRevenue = totalRevenue * 0.05; // 5% commission
-            const pendingReports = reports.filter(report => report.status === 'pending').length;
-
-            // Count users by role
-            const usersByRole = {
-                user: users.filter(user => user.role === 'user').length,
-                seller: users.filter(user => user.role === 'seller').length,
-                admin: users.filter(user => user.role === 'admin').length
-            };
-
-            // Count orders by status
-            const ordersByStatus = {
-                pending: orders.filter(order => order.status === 'pending').length,
-                shipped: orders.filter(order => order.status === 'shipped').length,
-                delivered: orders.filter(order => order.status === 'delivered').length,
-                canceled: orders.filter(order => order.status === 'canceled').length
-            };
-
-            return {
-                totalUsers,
-                totalOrders,
-                totalRevenue,
-                commissionRevenue,
-                pendingReports,
-                usersByRole,
-                ordersByStatus
-            };
-        } catch (error) {
-            console.error('Error fetching dashboard stats:', error);
-            throw error;
+            console.error('Error loading admin dashboard:', error);
+            alert('Không thể tải thông tin dashboard');
         }
     }
-};
+
+    setupEventListeners() {
+        // Xử lý form thêm/sửa người dùng
+        const userForm = document.getElementById('user-form');
+        if (userForm) {
+            userForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const data = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    role: formData.get('role'),
+                    status: formData.get('status')
+                };
+
+                const userId = formData.get('user_id');
+                try {
+                    if (userId) {
+                        await api.updateUser(userId, data);
+                        alert('Cập nhật người dùng thành công');
+                    } else {
+                        await api.createUser(data);
+                        alert('Thêm người dùng thành công');
+                    }
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error saving user:', error);
+                    alert('Không thể lưu thông tin người dùng');
+                }
+            });
+        }
+
+        // Xử lý form thêm/sửa sản phẩm
+        const productForm = document.getElementById('product-form');
+        if (productForm) {
+            productForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const data = {
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    price: parseFloat(formData.get('price')),
+                    stock: parseInt(formData.get('stock')),
+                    category: formData.get('category'),
+                    status: formData.get('status')
+                };
+
+                const productId = formData.get('product_id');
+                try {
+                    if (productId) {
+                        await api.updateProduct(productId, data);
+                        alert('Cập nhật sản phẩm thành công');
+                    } else {
+                        await api.createProduct(data);
+                        alert('Thêm sản phẩm thành công');
+                    }
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error saving product:', error);
+                    alert('Không thể lưu thông tin sản phẩm');
+                }
+            });
+        }
+
+        // Xử lý form cập nhật trạng thái đơn hàng
+        const orderForm = document.getElementById('order-form');
+        if (orderForm) {
+            orderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const orderId = formData.get('order_id');
+                const status = formData.get('status');
+
+                try {
+                    await api.updateOrderStatus(orderId, status);
+                    alert('Cập nhật trạng thái đơn hàng thành công');
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error updating order status:', error);
+                    alert('Không thể cập nhật trạng thái đơn hàng');
+                }
+            });
+        }
+    }
+
+    async deleteUser(userId) {
+        if (!confirm('Bạn có chắc muốn xóa người dùng này?')) return;
+
+        try {
+            await api.deleteUser(userId);
+            alert('Xóa người dùng thành công');
+            window.location.reload();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert('Không thể xóa người dùng');
+        }
+    }
+
+    async deleteProduct(productId) {
+        if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
+
+        try {
+            await api.deleteProduct(productId);
+            alert('Xóa sản phẩm thành công');
+            window.location.reload();
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            alert('Không thể xóa sản phẩm');
+        }
+    }
+}
+
+const admin = new Admin();
+window.admin = admin; // Make admin globally available
+export default admin;

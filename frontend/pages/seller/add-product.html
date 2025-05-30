@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm sản phẩm mới - E-Commerce Shop</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="../index.html" class="navbar-brand">E-Commerce</a>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a href="../index.html" class="nav-link">Trang chủ</a></li>
+                    <li class="nav-item"><a href="../seller-dashboard.html" class="nav-link">Dashboard</a></li>
+                    <li class="nav-item"><a href="products.html" class="nav-link">Sản phẩm</a></li>
+                    <li class="nav-item"><a href="add-product.html" class="nav-link active">Thêm sản phẩm</a></li>
+                    <li class="nav-item" id="auth-container">
+                        <!-- Auth container will be filled dynamically -->
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="seller-section">
+                <h1>Thêm sản phẩm mới</h1>
+
+            <form id="add-product-form" class="product-form">
+                <div class="form-group">
+                    <label for="product-name">Tên sản phẩm *</label>
+                    <input type="text" id="product-name" class="form-control" required>
+                    </div>
+
+                <div class="form-group">
+                    <label for="product-description">Mô tả sản phẩm *</label>
+                    <textarea id="product-description" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-price">Giá sản phẩm (VNĐ) *</label>
+                        <input type="number" id="product-price" class="form-control" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-stock">Số lượng tồn kho *</label>
+                        <input type="number" id="product-stock" class="form-control" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-category">Danh mục *</label>
+                    <select id="product-category" class="form-control" required>
+                        <option value="">Chọn danh mục</option>
+                        <!-- Categories will be loaded dynamically -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-images">Hình ảnh sản phẩm *</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="product-images" class="form-control" multiple accept="image/*" required>
+                        <div id="image-preview" class="image-preview"></div>
+                    </div>
+                    <small class="form-text">Bạn có thể tải lên nhiều hình ảnh. Hình đầu tiên sẽ là ảnh đại diện.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Thông số kỹ thuật</label>
+                    <div id="specifications-container">
+                        <div class="specification-row">
+                            <label>
+                                <input type="text" class="form-control" placeholder="Tên thông số">
+                            </label>
+                            <label>
+                                <input type="text" class="form-control" placeholder="Giá trị">
+                            </label>
+                            <button type="button" class="btn-sm remove-spec">Xóa</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-specification" class="btn-sm">Thêm thông số</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-tags">Thẻ (tags)</label>
+                    <input type="text" id="product-tags" class="form-control" placeholder="Nhập các thẻ, phân cách bằng dấu phẩy">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='products.html'">Hủy</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về chúng tôi</h3>
+                    <p>E-Commerce Shop cung cấp nền tảng mua sắm trực tuyến tin cậy và tiện lợi.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên hệ</h3>
+                    <p>Email: contact@ecommerce.com</p>
+                    <p>Điện thoại: (123) 456-7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Commerce Shop. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { sellerService } from '../../assets/js/seller.js';
+        import authService from '../../assets/js/auth.js';
+
+        // Check seller permission
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const isLoggedIn = await authService.checkAuth();
+                if (!isLoggedIn) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                const user = authService.getUser();
+                if (user.role !== 'seller') {
+                    alert('Bạn không có quyền truy cập trang này');
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                // Initialize the page
+                await loadCategories();
+                setupEventListeners();
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                alert('Có lỗi xảy ra khi tải trang');
+            }
+        });
+
+        async function loadCategories() {
+            try {
+                const categories = await sellerService.getCategories();
+                const categorySelect = document.getElementById('product-category');
+
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                alert('Có lỗi xảy ra khi tải danh mục');
+            }
+        }
+
+        function setupEventListeners() {
+            // Add Product Form
+            document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('name', document.getElementById('product-name').value);
+                    formData.append('description', document.getElementById('product-description').value);
+                    formData.append('price', document.getElementById('product-price').value);
+                    formData.append('stock', document.getElementById('product-stock').value);
+                    formData.append('category_id', document.getElementById('product-category').value);
+
+                    // Add specifications as a JSON string
+                    const specifications = {};
+                    document.querySelectorAll('.specification-row').forEach(row => {
+                        const name = row.querySelector('input:first-child').value;
+                        const value = row.querySelector('input:last-child').value;
+                        if (name && value) {
+                            specifications[name] = value;
+                        }
+                    });
+                    formData.append('attributes', JSON.stringify(specifications));
+
+                    // Add tags as a JSON array
+                    const tags = document.getElementById('product-tags').value
+                        .split(',')
+                        .map(tag => tag.trim())
+                        .filter(tag => tag.length > 0);
+                    formData.append('categories', JSON.stringify(tags));
+
+                    // Add images
+                    const imageFiles = document.getElementById('product-images').files;
+                    for (let i = 0; i < imageFiles.length; i++) {
+                        formData.append('images', imageFiles[i]);
+                    }
+
+                    await sellerService.createProduct(formData);
+                    alert('Thêm sản phẩm thành công!');
+                    window.location.href = 'products.html';
+                } catch (error) {
+                    console.error('Error creating product:', error);
+                    alert('Có lỗi xảy ra khi thêm sản phẩm: ' + error.message);
+                }
+            });
+
+            // Image Preview
+            document.getElementById('product-images').addEventListener('change', function() {
+                const preview = document.getElementById('image-preview');
+                preview.innerHTML = '';
+
+                for (const file of this.files) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = document.createElement('img');
+                        if (typeof event.target.result === 'string') {
+                            img.src = event.target.result;
+                            preview.appendChild(img);
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Add Specification
+            document.getElementById('add-specification').addEventListener('click', () => {
+                const container = document.getElementById('specifications-container');
+                const row = document.createElement('div');
+                row.className = 'specification-row';
+                row.innerHTML = `
+                    <label>
+                        <input type="text" class="form-control" placeholder="Tên thông số">
+                    </label>
+                    <label>
+                        <input type="text" class="form-control" placeholder="Giá trị">
+                    </label>
+                    <button type="button" class="btn-sm remove-spec">Xóa</button>
+                `;
+                container.appendChild(row);
+
+                row.querySelector('.remove-spec')?.addEventListener('click', () => {
+                    row.remove();
+                });
+            });
+        }
+    </script>
+</body>
+</html>

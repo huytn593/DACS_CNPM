@@ -3,5 +3,5 @@ export const config = {
     APP_NAME: 'E-Commerce Shop',
     CURRENCY: 'VND',
     CURRENCY_SYMBOL: '₫',
-    IMAGE_PLACEHOLDER: '/assets/img/placeholder.jpg'
+    IMAGE_PLACEHOLDER: 'http://localhost:8000/uploads/placeholder.svg'
 };

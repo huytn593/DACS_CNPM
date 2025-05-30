@@ -2,7 +2,7 @@
 from fastapi import HTTPException, status
 from datetime import datetime, UTC
 import uuid
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Any
 
 from ..models.cart import CartItemCreate, CartItemUpdate, CartItem, CartResponse
 from ..controllers import product_controller
@@ -21,15 +21,14 @@ async def add_to_cart(user_id: str, item_data: CartItemCreate) -> CartResponse:
         )
 
     # Check if stock is available
-    if product.stock < item_data.quantity:
+    if product.get("stock", 0) < item_data.quantity:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Not enough stock for {product.name}. Only {product.stock} available."
+            detail=f"Not enough stock for {product.get('name')}. Only {product.get('stock')} available."
         )
 
     # Get user's cart or create new one
     cart = await db.carts.find_one({"user_id": user_id})
-
     if not cart:
         cart = {
             "user_id": user_id,
@@ -38,27 +37,29 @@ async def add_to_cart(user_id: str, item_data: CartItemCreate) -> CartResponse:
         }
 
     # Check if item already in cart
-    existing_item = None
-    for item in cart["items"]:
-        if (item["product_id"] == item_data.product_id and
+    existing_item: Optional[Dict[str, Any]] = None
+    items = cart.get("items", [])
+    for item in items:
+        if isinstance(item, dict) and (item.get("product_id") == item_data.product_id and
                 item.get("attributes") == item_data.attributes):
             existing_item = item
             break
 
     if existing_item:
         # Update quantity
-        total_quantity = existing_item["quantity"] + item_data.quantity
+        current_quantity = existing_item.get("quantity", 0) if isinstance(existing_item, dict) else 0
+        total_quantity = current_quantity + item_data.quantity
 
         # Check if total quantity exceeds stock
-        if total_quantity > product.stock:
+        if total_quantity > product.get("stock", 0):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Total quantity exceeds available stock for {product.name}"
+                detail=f"Total quantity exceeds available stock for {product.get('name')}"
             )
 
         # Update item
-        for item in cart["items"]:
-            if (item["product_id"] == item_data.product_id and
+        for item in items:
+            if isinstance(item, dict) and (item.get("product_id") == item_data.product_id and
                     item.get("attributes") == item_data.attributes):
                 item["quantity"] = total_quantity
                 item["updated_at"] = datetime.now(UTC).isoformat()
@@ -67,10 +68,10 @@ async def add_to_cart(user_id: str, item_data: CartItemCreate) -> CartResponse:
         # Add new item
         cart_item = {
             "id": str(uuid.uuid4()),
-            "product_id": product.id,
-            "product_name": product.name,
-            "product_image": product.images[0] if product.images else None,
-            "price": product.price,
+            "product_id": product.get("id"),
+            "product_name": product.get("name"),
+            "product_image": product.get("images", [None])[0],
+            "price": product.get("price", 0),
             "quantity": item_data.quantity,
             "attributes": item_data.attributes,
             "in_stock": True,
@@ -108,33 +109,43 @@ async def get_formatted_cart(user_id: str) -> CartResponse:
         return CartResponse(items=[], total=0, items_count=0)
 
     # Update items with current product information
-    updated_items = []
-    total = 0
-    items_count = 0
+    updated_items: List[CartItem] = []
+    total: float = 0
+    items_count: int = 0
 
-    for item in cart["items"]:
+    items = cart.get("items", [])
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+
         # Get current product information
-        product = await product_controller.get_product(item["product_id"])
+        product_id = item.get("product_id")
+        if not product_id:
+            continue
 
+        product = await product_controller.get_product(product_id)
         if product:
             # Update product info
-            item["product_name"] = product.name
-            item["product_image"] = product.images[0] if product.images else None
-            item["price"] = product.price
+            item["product_name"] = product.get("name")
+            item["product_image"] = product.get("images", [None])[0]
+            item["price"] = product.get("price", 0)
 
             # Check stock availability
-            in_stock = product.stock >= item["quantity"]
+            quantity = item.get("quantity", 0)
+            in_stock = product.get("stock", 0) >= quantity
             item["in_stock"] = in_stock
 
             # Add to totals if in stock
             if in_stock:
-                total += item["price"] * item["quantity"]
-                items_count += item["quantity"]
+                price = item.get("price", 0)
+                total += price * quantity
+                items_count += quantity
 
             # Convert datetime if needed
-            if isinstance(item["added_at"], str):
+            added_at = item.get("added_at")
+            if isinstance(added_at, str):
                 try:
-                    item["added_at"] = datetime.fromisoformat(item["added_at"].replace("Z", "+00:00"))
+                    item["added_at"] = datetime.fromisoformat(added_at.replace("Z", "+00:00"))
                 except (ValueError, TypeError):
                     item["added_at"] = datetime.now(UTC)
 
@@ -171,24 +182,32 @@ async def update_cart_item(user_id: str, item_id: str, update_data: CartItemUpda
 
     # Find the item
     item_found = False
-    for i, item in enumerate(cart["items"]):
-        if item["id"] == item_id:
+    items = cart.get("items", [])
+    for i, item in enumerate(items):
+        if isinstance(item, dict) and item.get("id") == item_id:
             item_found = True
 
             # If quantity is provided, update it
             if update_data.quantity is not None:
                 # Check if product exists and has enough stock
-                product = await product_controller.get_product(item["product_id"])
+                product_id = item.get("product_id")
+                if not product_id:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Product ID not found in cart item"
+                    )
+
+                product = await product_controller.get_product(product_id)
                 if not product:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail="Product no longer exists"
                     )
 
-                if product.stock < update_data.quantity:
+                if product.get("stock", 0) < update_data.quantity:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"Not enough stock for {product.name}. Only {product.stock} available."
+                        detail=f"Not enough stock for {product.get('name')}. Only {product.get('stock')} available."
                     )
 
                 cart["items"][i]["quantity"] = update_data.quantity
@@ -230,9 +249,10 @@ async def remove_cart_item(user_id: str, item_id: str) -> Optional[CartResponse]
     # Find and remove the item
     item_found = False
     new_items = []
+    items = cart.get("items", [])
 
-    for item in cart["items"]:
-        if item["id"] == item_id:
+    for item in items:
+        if isinstance(item, dict) and item.get("id") == item_id:
             item_found = True
         else:
             new_items.append(item)

@@ -70,7 +70,7 @@ async def create_category(category_data: CategoryCreate) -> CategoryResponse:
     # Create category
     category = Category(
         id=category_id,
-        **category_data.model_dump(),
+        **category_data.modeldump(),
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC)
     )

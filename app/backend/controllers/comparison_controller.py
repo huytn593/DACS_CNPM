@@ -1,6 +1,6 @@
 # app/backend/controllers/comparison_controller.py
 from fastapi import HTTPException, status
-from typing import List, Dict
+from typing import List
 
 from ..controllers import product_controller
 from ..models.product import ProductResponse
@@ -52,5 +52,6 @@ async def get_comparable_products(product_id: str, limit: int = 4) -> List[Produ
     )
 
     result = await product_controller.search_products(search_params)
-
-    return result.items
+    
+    # Return the list of products from the search result
+    return result["items"] if isinstance(result, dict) else []

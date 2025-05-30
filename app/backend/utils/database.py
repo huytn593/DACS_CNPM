@@ -1,7 +1,6 @@
 # app/backend/utils/database.py
 import motor.motor_asyncio
 from typing import Optional
-
 from app.config import settings
 
 # MongoDB client
@@ -21,17 +20,11 @@ def get_db():
 async def connect_to_mongo():
     """Connect to MongoDB"""
     global client
-    try:
-        client = motor.motor_asyncio.AsyncIOMotorClient(
-            settings.MONGODB_URL,
-            serverSelectionTimeoutMS=5000
-        )
-        await client.admin.command('ping')
-        print("Connected to MongoDB")
-    except Exception as e:
-        print(f"Failed to connect to MongoDB: {e}")
-        # Thêm xử lý retry ở đây
-        raise
+    client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
+
+    # Test connection
+    await client.admin.command('ping')
+    print("Connected to MongoDB")
 
 
 async def close_mongo_connection():

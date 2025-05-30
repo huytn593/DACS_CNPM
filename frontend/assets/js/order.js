@@ -1,95 +1,101 @@
 // /frontend/assets/js/order.js
-import { api } from './api.js';
+import api from './api.js';
 
-export const orderService = {
-    // Create a new order
-    async createOrder(orderData) {
+// SCHEMA TYPEDEFS (JSDoc)
+/**
+ * @typedef {Object} OrderCreate
+ * @property {string} shipping_address
+ * @property {string} phone_number
+ * @property {Array<OrderItemBase>} items
+ * @property {string|null} [payment_method="COD"]
+ */
+/**
+ * @typedef {Object} OrderItemBase
+ * @property {string} product_id
+ * @property {number} quantity
+ * @property {number} price
+ * @property {Object|null} attributes
+ */
+/**
+ * @typedef {Object} OrderResponse
+ * @property {string} id
+ * @property {string} order_number
+ * @property {string} user_id
+ * @property {string} user_name
+ * @property {number} total_amount
+ * @property {Array<OrderItem>} items
+ * @property {string} shipping_address
+ * @property {string|null} billing_address
+ * @property {string} status
+ * @property {string} payment_method
+ * @property {string} payment_status
+ * @property {string|null} notes
+ * @property {string} phone_number
+ * @property {number} shipping_fee
+ * @property {string} created_at
+ * @property {string} updated_at
+ */
+/**
+ * @typedef {Object} OrderItem
+ * @property {string} product_id
+ * @property {number} quantity
+ * @property {number} price
+ * @property {Object|null} attributes
+ * @property {string} id
+ * @property {string|null} product_name
+ * @property {string|null} product_image
+ */
+
+class OrderService {
+    constructor() {
+        this.orders = [];
+    }
+
+    async createOrder(data) {
+        return api.createOrder(data);
+    }
+
+    async getOrders(page = 1, limit = 10) {
         try {
-            return await api.createOrder({
-                shipping_address: orderData.shipping_address,
-                phone_number: orderData.phone_number,
-                payment_method: orderData.payment_method || 'COD',
-                items: orderData.items
-            });
+            const response = await api.getUserOrders();
+            this.orders = response.items || [];
+            return response;
         } catch (error) {
-            console.error('Error creating order:', error);
-            throw error;
+            throw new Error('Không thể tải danh sách đơn hàng');
         }
-    },
+    }
 
-    // Get user orders with pagination
-    async getUserOrders(page = 1, size = 10) {
-        try {
-            return await api.getUserOrders(page, size);
-        } catch (error) {
-            console.error('Error fetching user orders:', error);
-            throw error;
-        }
-    },
-
-    // Get order by ID
-    async getOrderById(orderId) {
+    async getOrderDetail(orderId) {
         try {
             return await api.getOrderById(orderId);
         } catch (error) {
-            console.error('Error fetching order details:', error);
-            throw error;
+            throw new Error('Không thể tải thông tin đơn hàng');
         }
-    },
-
-    // Update order status
-    async updateOrderStatus(orderId, status) {
-        try {
-            return await api.updateOrderStatus(orderId, status);
-        } catch (error) {
-            console.error('Error updating order status:', error);
-            throw error;
-        }
-    },
-
-    // Create order from cart
-    async createOrderFromCart(shippingAddress, phoneNumber, paymentMethod = 'COD') {
-        try {
-            // First get the cart
-            const cart = await api.getCart();
-
-            // Transform cart items to order items
-            const orderItems = cart.items.map(item => ({
-                product_id: item.product_id,
-                quantity: item.quantity,
-                price: item.price,
-                attributes: item.attributes || null
-            }));
-
-            // Create the order
-            const order = await this.createOrder({
-                shipping_address: shippingAddress,
-                phone_number: phoneNumber,
-                payment_method: paymentMethod,
-                items: orderItems
-            });
-
-            // Clear the cart
-            await Promise.all(cart.items.map(item => api.removeCartItem(item.id)));
-
-            return order;
-        } catch (error) {
-            console.error('Error creating order from cart:', error);
-            throw error;
-        }
-    },
-
-    // Calculate order summary
-    calculateOrderSummary(items, shippingFee = 30000) {
-        const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const total = subtotal + shippingFee;
-
-        return {
-            subtotal,
-            shippingFee,
-            total,
-            itemCount: items.length,
-            totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0)
-        };
     }
-};
+
+    async cancelOrder(orderId) {
+        try {
+            return await api.cancelOrder(orderId);
+        } catch (error) {
+            throw new Error('Không thể hủy đơn hàng');
+        }
+    }
+
+    async getOrderStatus(orderId) {
+        try {
+            const order = await this.getOrderDetail(orderId);
+            return order.status;
+        } catch (error) {
+            throw new Error('Không thể tải trạng thái đơn hàng');
+        }
+    }
+
+    // Alias methods for backward compatibility
+    async getOrderStatusById(orderId) {
+        return this.getOrderStatus(orderId);
+    }
+}
+
+const orderService = new OrderService();
+export { orderService };
+export default orderService;

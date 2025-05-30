@@ -6,7 +6,7 @@ from datetime import datetime
 
 class ProductBase(BaseModel):
     id: str = Field(default_factory=lambda: str(ObjectId()))
-    average_rating: Optional[float] = 0
+    avg_rating: Optional[float] = 0
     review_count: Optional[int] = 0
     name: str
     description: str
@@ -52,7 +52,7 @@ class ProductResponse(ProductInDB):
     comparison_warning: Optional[str] = None
 
 class ProductListResponse(BaseModel):
-    products: List[ProductResponse]
+    items: List[ProductResponse]
     total: int
     page: int
     size: int
