@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, Path, Body, HTTPException, status
 from typing import List
 
-from app.backend.models.order import OrderCreate, OrderUpdate, OrderResponse
 from app.backend.controllers import order_controller
+from app.backend.models.order import OrderCreate, OrderUpdate, OrderResponse
 from app.backend.controllers import seller_controller  # Add this import
 from app.backend.utils.auth import get_current_user, seller_required
 
@@ -18,15 +18,15 @@ async def create_order(
     return await order_controller.create_order(current_user["id"], order)
 
 
-@router.get("/orders",response_model=List[OrderResponse],operation_id="seller_orders_list")
-async def get_seller_orders(current_user=Depends(seller_required)):
+@router.get("/orders", response_model=List[OrderResponse])
+async def get_orders(current_user=Depends(get_current_user)):
     # Regular users can only see their own orders
     if current_user["role"] == "user":
-        return await order_controller.get_seller_orders(current_user["id"])
+        return await order_controller.get_orders(current_user["id"])
 
     # Admin can see all orders
     if current_user["role"] == "admin":
-        return await order_controller.get_seller_orders(current_user["id"])
+        return await order_controller.get_orders()
 
     # Sellers can see orders containing their products
     if current_user["role"] == "seller":

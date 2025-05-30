@@ -74,10 +74,8 @@ async def delete_review(
         current_user=Depends(get_current_user)
 ):
     # Admin can delete any review, user can only delete their own
-    if current_user["role"] == "admin":
-        deleted = await review_controller.delete_review(review_id, None)
-    else:
-        deleted = await review_controller.delete_review(review_id, current_user["id"])
+    user_id = None if current_user["role"] == "admin" else current_user["id"]
+    deleted = await review_controller.delete_review(review_id, user_id)
 
     if not deleted:
         raise HTTPException(

@@ -1,6 +1,6 @@
 # app/backend/models/report.py
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from enum import Enum
 
@@ -31,3 +31,10 @@ class ReportResponse(Report):
     product_name: Optional[str] = None
     product_image: Optional[str] = None
     reporter_name: Optional[str] = None
+
+class ReportListResponse(BaseModel):
+    items: List[ReportResponse]
+    total: int
+    page: int
+    size: int
+    pages: int

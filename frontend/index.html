@@ -4,8 +4,33 @@
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="0;url=/pages/index.html">
     <title>Redirecting...</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
 </head>
 <body>
-    <p>Đang chuyển hướng đến <a href="/pages/index.html">trang chủ</a>...</p>
+    <header class="header py-3 mb-4" style="background:#fff; border-bottom:1px solid #eee;">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="index.html" class="navbar-brand d-flex align-items-center gap-2" style="color:#000;font-size:2rem;font-weight:bold;text-decoration:none;">
+                <i class="bi bi-bag"></i> E-Commerce
+            </a>
+            <form id="search-form" class="d-flex align-items-center" style="gap:0.5rem;max-width:480px;flex:1;margin:0 2rem;">
+                <label for="search-input"></label>
+                <input type="text" id="search-input" class="form-control" placeholder="Tìm kiếm sản phẩm..." style="flex:1;">
+                <button type="submit" class="btn btn-dark"><i class="bi bi-search"></i></button>
+            </form>
+            <div class="d-flex align-items-center gap-3">
+                <a href="pages/cart.html" class="position-relative" style="color:#000;font-size:1.5rem;">
+                    <i class="bi bi-cart"></i>
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" style="font-size: 0.8rem; display: none;">0</span>
+                </a>
+                <div id="auth-container">
+                    <div class="d-flex gap-2">
+                        <a href="pages/login.html" class="btn btn-outline-primary">Đăng nhập</a>
+                        <a href="pages/register.html" class="btn btn-primary">Đăng ký</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <p>Đang chuyển hướng đến <a href="./index.html">trang chủ</a>...</p>
 </body>
 </html>

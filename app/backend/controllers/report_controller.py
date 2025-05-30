@@ -4,7 +4,7 @@ from datetime import datetime, UTC
 import uuid
 from typing import List, Optional, Dict
 
-from ..models.report import ReportCreate, ReportUpdate, Report, ReportResponse, ReportStatus
+from ..models.report import ReportCreate, ReportUpdate, Report, ReportResponse, ReportStatus, ReportListResponse
 from ..utils.database import get_db
 
 
@@ -58,30 +58,30 @@ async def create_report(user_id: str, report_data: ReportCreate) -> ReportRespon
 
 
 async def get_reports(
-        status: Optional[ReportStatus] = None,
+        report_status: Optional[str] = None,
         page: int = 1,
         size: int = 20
-) -> Dict:
+) -> ReportListResponse:
     db = get_db()
 
-    # Build query
-    query = {}
-    if status:
-        query["status"] = status
+    # Build filter
+    filters = {}
+    if report_status:
+        filters["status"] = report_status
 
     # Calculate skip value for pagination
     skip = (page - 1) * size
 
     # Get total count
-    total_count = await db.reports.count_documents(query)
+    total = await db.reports.count_documents(filters)
 
-    # Get reports
-    cursor = db.reports.find(query) \
+    # Get reports with pagination
+    cursor = db.reports.find(filters) \
         .sort("created_at", -1) \
         .skip(skip) \
         .limit(size)
 
-    reports = await cursor.to_list(length=None)
+    reports = await cursor.to_list(length=size)
 
     # Enhance reports with product and user details
     enhanced_reports = []
@@ -106,15 +106,15 @@ async def get_reports(
         )
 
     # Calculate total pages
-    total_pages = (total_count + size - 1) // size
+    pages = (total + size - 1) // size if total > 0 else 1
 
-    return {
-        "items": enhanced_reports,
-        "total": total_count,
-        "page": page,
-        "size": size,
-        "pages": total_pages
-    }
+    return ReportListResponse(
+        items=enhanced_reports,
+        total=total,
+        page=page,
+        size=size,
+        pages=pages
+    )
 
 
 async def get_report(report_id: str) -> Optional[ReportResponse]:
@@ -141,7 +141,7 @@ async def get_report(report_id: str) -> Optional[ReportResponse]:
     )
 
 
-async def update_report(report_id: str, report_update: ReportUpdate) -> Optional[ReportResponse]:
+async def update_report_status(report_id: str, new_status: ReportStatus) -> Optional[ReportResponse]:
     db = get_db()
 
     # Get report
@@ -149,11 +149,12 @@ async def update_report(report_id: str, report_update: ReportUpdate) -> Optional
     if not report:
         return None
 
-    # Prepare update data
-    update_data = {k: v for k, v in report_update.model_dump().items() if v is not None}
-    update_data["updated_at"] = datetime.now(UTC)
+    # Update report status
+    update_data = {
+        "status": new_status,
+        "updated_at": datetime.now(UTC)
+    }
 
-    # Update report
     await db.reports.update_one(
         {"id": report_id},
         {"$set": update_data}

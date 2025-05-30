@@ -5,7 +5,6 @@ import uuid
 from typing import List, Optional
 
 from ..models.order import OrderCreate, OrderUpdate, Order, OrderResponse, OrderStatus, OrderItem
-from ..routes.cart import clear_cart
 from ..controllers import product_controller, cart_controller
 from ..utils.database import get_db
 
@@ -67,40 +66,53 @@ async def create_order(user_id: str, order_data: OrderCreate) -> OrderResponse:
     shipping_fee = 30000  # Fixed shipping fee
     total_amount += shipping_fee
 
+    # Calculate admin commission (5%)
+    admin_commission = total_amount * 0.05
+    seller_amount = total_amount - admin_commission
+
     # Create order
     order = Order(
         id=str(uuid.uuid4()),
+        order_number=f"ORD-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
         user_id=user_id,
+        user_name=user.get("name", ""),
         shipping_address=order_data.shipping_address,
         phone_number=order_data.phone_number,
         items=order_items,
         status=OrderStatus.pending,
         total_amount=total_amount,
-        payment_method=order_data.payment_method or "COD",
+        payment_method="COD",  # Only COD is supported
+        payment_status="pending",
         shipping_fee=shipping_fee,
+        admin_commission=admin_commission,
+        seller_amount=seller_amount,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC)
     )
 
     await db.orders.insert_one(order.model_dump())
 
-    return OrderResponse(**order.model_dump())
-
+    # Clear user's cart after successful order
     await cart_controller.clear_cart(user_id)
 
     return OrderResponse(**order.model_dump())
 
 
-async def get_order(order_id: str, user_id: str = None):
+async def get_order(order_id: str, user_id: Optional[str] = None):
     db = get_db()
+
+    # Build query
+    query = {"id": order_id}
+    if user_id:
+        query["user_id"] = user_id
 
     # Find order and add user_name field
     pipeline = [
-        {"$match": {"_id": order_id}},
+        {"$match": query},
         {"$lookup": {
             "from": "users",
             "localField": "user_id",
-            "foreignField": "_id",
+            "foreignField": "id",
             "as": "user"
         }},
         {"$addFields": {
@@ -116,8 +128,7 @@ async def get_order(order_id: str, user_id: str = None):
     return order[0]
 
 
-async def update_order(order_id: str, order_update: OrderUpdate, user_id: Optional[str] = None) -> Optional[
-    OrderResponse]:
+async def update_order(order_id: str, order_update: OrderUpdate, user_id: Optional[str] = None) -> Optional[OrderResponse]:
     db = get_db()
 
     # Build query
@@ -137,9 +148,25 @@ async def update_order(order_id: str, order_update: OrderUpdate, user_id: Option
     # Special handling for status change
     if order_update.status and order_update.status != order["status"]:
         old_status = OrderStatus(order["status"])
+        new_status = order_update.status
+
+        # Validate status transition
+        valid_transitions = {
+            OrderStatus.pending: [OrderStatus.seller_confirmed, OrderStatus.canceled],
+            OrderStatus.seller_confirmed: [OrderStatus.shipped, OrderStatus.canceled],
+            OrderStatus.shipped: [OrderStatus.delivered, OrderStatus.canceled],
+            OrderStatus.delivered: [],  # Final state
+            OrderStatus.canceled: []  # Final state
+        }
+
+        if new_status not in valid_transitions[old_status]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid status transition from {old_status} to {new_status}"
+            )
 
         # If canceling order, restore product stock
-        if order_update.status == OrderStatus.canceled and old_status != OrderStatus.canceled:
+        if new_status == OrderStatus.canceled and old_status != OrderStatus.canceled:
             for item in order["items"]:
                 await db.products.update_one(
                     {"id": item["product_id"]},
@@ -147,7 +174,7 @@ async def update_order(order_id: str, order_update: OrderUpdate, user_id: Option
                 )
 
         # If un-canceling order, reduce product stock again
-        elif old_status == OrderStatus.canceled and order_update.status != OrderStatus.canceled:
+        elif old_status == OrderStatus.canceled and new_status != OrderStatus.canceled:
             for item in order["items"]:
                 product = await product_controller.get_product(item["product_id"])
 
@@ -161,6 +188,35 @@ async def update_order(order_id: str, order_update: OrderUpdate, user_id: Option
                 await db.products.update_one(
                     {"id": item["product_id"]},
                     {"$inc": {"stock": -item["quantity"]}}
+                )
+
+        # If order is delivered, update payment status and release funds to seller
+        if new_status == OrderStatus.delivered:
+            update_data["payment_status"] = "completed"
+            
+            # Get seller's products in this order
+            seller_products = {}
+            for item in order["items"]:
+                product = await product_controller.get_product(item["product_id"])
+                if product and product.seller_id not in seller_products:
+                    seller_products[product.seller_id] = {
+                        "amount": 0,
+                        "commission": 0
+                    }
+                if product:
+                    seller_products[product.seller_id]["amount"] += item["price"] * item["quantity"]
+                    seller_products[product.seller_id]["commission"] += (item["price"] * item["quantity"]) * 0.05
+
+            # Update seller balances
+            for seller_id, amounts in seller_products.items():
+                await db.users.update_one(
+                    {"id": seller_id},
+                    {
+                        "$inc": {
+                            "balance": amounts["amount"] - amounts["commission"],
+                            "total_earnings": amounts["amount"] - amounts["commission"]
+                        }
+                    }
                 )
 
     # Update order
@@ -220,7 +276,6 @@ async def get_seller_orders(seller_id: str) -> List[OrderResponse]:
         return []
 
     # Get orders containing seller's products
-    # MongoDB query equivalent to finding orders with items.product_id in product_ids
     pipeline = [
         {
             "$match": {
@@ -242,5 +297,21 @@ async def get_seller_orders(seller_id: str) -> List[OrderResponse]:
         # Recalculate total for seller's items only
         seller_total = sum(item["price"] * item["quantity"] for item in order["items"])
         order["seller_total"] = seller_total
+
+    return [OrderResponse(**order) for order in orders]
+
+
+async def get_orders(user_id: Optional[str] = None) -> List[OrderResponse]:
+    """Get orders for a specific user or all orders if user_id is None (admin only)"""
+    db = get_db()
+
+    # Build filter
+    filters = {}
+    if user_id:
+        filters["user_id"] = user_id
+
+    # Get orders
+    cursor = db.orders.find(filters).sort("created_at", -1)
+    orders = await cursor.to_list(length=100)
 
     return [OrderResponse(**order) for order in orders]

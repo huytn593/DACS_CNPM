@@ -72,23 +72,23 @@ async def update_product_rating(product_id: str) -> float:
 
     if not reviews:
         # If no reviews, set rating to 0
-        average_rating = 0
+        avg_rating = 0
     else:
         # Calculate average rating
-        average_rating = sum(r["rating"] for r in reviews) / len(reviews)
+        avg_rating = sum(r["rating"] for r in reviews) / len(reviews)
         # Round to 1 decimal place
-        average_rating = round(average_rating * 10) / 10
+        avg_rating = round(avg_rating * 10) / 10
 
     # Update product
     await db.products.update_one(
         {"id": product_id},
         {"$set": {
-            "average_rating": average_rating,
+            "avg_rating": avg_rating,
             "review_count": len(reviews)
         }}
     )
 
-    return average_rating
+    return avg_rating
 
 
 async def get_product_reviews(product_id: str, page: int = 1, size: int = 10) -> dict:
@@ -167,18 +167,23 @@ async def update_review(review_id: str, user_id: str, review_update: ReviewUpdat
     return ReviewResponse(**updated_review)
 
 
-async def delete_review(review_id: str, user_id: str) -> bool:
+async def delete_review(review_id: str, user_id: Optional[str] = None) -> bool:
     db = get_db()
 
+    # Build query
+    query = {"id": review_id}
+    if user_id:  # If user_id is provided, verify ownership
+        query["user_id"] = user_id
+
     # Get the review to get the product_id
-    review = await db.reviews.find_one({"id": review_id, "user_id": user_id})
+    review = await db.reviews.find_one(query)
     if not review:
         return False
 
     product_id = review["product_id"]
 
     # Delete review
-    result = await db.reviews.delete_one({"id": review_id, "user_id": user_id})
+    result = await db.reviews.delete_one(query)
 
     if result.deleted_count:
         # Update product average rating

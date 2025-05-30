@@ -1,5 +1,4 @@
 # app/backend/controllers/stock_alert_controller.py
-from fastapi import HTTPException, status
 from datetime import datetime, UTC
 import uuid
 from typing import List, Optional

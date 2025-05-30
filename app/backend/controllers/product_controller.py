@@ -2,7 +2,7 @@
 from fastapi import HTTPException, status
 from datetime import datetime, UTC
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
 from ..controllers import stock_alert_controller
 
 from ..models.product import ProductCreate, ProductUpdate, ProductInDB as Product, ProductResponse
@@ -12,16 +12,17 @@ from ..utils.database import get_db
 # Define ProductSearchParams class here since it's missing from the models
 class ProductSearchParams:
     def __init__(
-            self,
-            query: Optional[str] = None,
-            category_id: Optional[str] = None,
-            min_price: Optional[float] = None,
-            max_price: Optional[float] = None,
-            active: Optional[bool] = True,
-            in_stock: Optional[bool] = True,
-            sort_by: Optional[str] = "newest",
-            page: int = 1,
-            size: int = 20
+        self,
+        query: Optional[str] = None,
+        category_id: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        active: Optional[bool] = True,
+        in_stock: Optional[bool] = True,
+        sort_by: Optional[str] = "newest",
+        page: int = 1,
+        size: int = 20,
+        exclude_ids: Optional[List[str]] = None
     ):
         self.query = query
         self.category_id = category_id
@@ -32,16 +33,14 @@ class ProductSearchParams:
         self.sort_by = sort_by
         self.page = page
         self.size = size
+        self.exclude_ids = exclude_ids or []
 
 
-async def create_product(product_data: ProductCreate, seller_id: str) -> ProductResponse:
+async def create_product(seller_id: str, product_data: ProductCreate) -> ProductResponse:
     db = get_db()
 
-    product_id = str(uuid.uuid4())
-
-    # Kiểm tra stock thấp để gửi cảnh báo nếu cần
     if product_data.stock is not None and product_data.stock <= 5:
-        await stock_alert_controller.check_stock_level(product_id, product_data.stock)
+        await stock_alert_controller.check_stock_level(product_data.id, product_data.stock)
 
     # Check if category exists
     if product_data.category_id:
@@ -52,15 +51,20 @@ async def create_product(product_data: ProductCreate, seller_id: str) -> Product
                 detail="Category not found"
             )
 
-    # Loại bỏ các trường sẽ truyền trực tiếp
-    data = product_data.model_dump()
-    for key in ["id", "seller_id", "average_rating", "review_count", "created_at", "updated_at"]:
-        data.pop(key, None)
+    # Create product ID
+    product_id = str(uuid.uuid4())
 
+    # Remove fields that will be set manually
+    product_data_dict = product_data.model_dump()
+    fields_to_remove = ['id', 'seller_id', 'review_count', 'average_rating', 'created_at', 'updated_at']
+    for field in fields_to_remove:
+        product_data_dict.pop(field, None)
+
+    # Create product
     product = Product(
         id=product_id,
         seller_id=seller_id,
-        **data,
+        **product_data_dict,
         average_rating=0,
         review_count=0,
         created_at=datetime.now(UTC),
@@ -115,15 +119,14 @@ async def get_product(product_id: str):
 async def update_product(product_id: str, product_update: ProductUpdate) -> Optional[ProductResponse]:
     db = get_db()
 
-    # Prepare update data
-    update_data = {k: v for k, v in product_update.model_dump().items() if v is not None}
-    if "stock" in update_data and update_data["stock"] is not None:
-        await stock_alert_controller.check_stock_level(product_id, update_data["stock"])
-
-    # Check if product exists
+    # Get product
     product = await db.products.find_one({"id": product_id})
     if not product:
         return None
+
+    # Prepare update data
+    update_data = {k: v for k, v in product_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(UTC)
 
     # Check if category exists if updating category
     if product_update.category_id:
@@ -134,10 +137,11 @@ async def update_product(product_id: str, product_update: ProductUpdate) -> Opti
                 detail="Category not found"
             )
 
-    update_data["updated_at"] = datetime.now(UTC)
-
     # Update product
-    await db.products.update_one({"id": product_id}, {"$set": update_data})
+    await db.products.update_one(
+        {"id": product_id},
+        {"$set": update_data}
+    )
 
     # Get updated product
     updated_product = await db.products.find_one({"id": product_id})
@@ -172,7 +176,7 @@ async def delete_product(product_id: str) -> bool:
     return result.deleted_count > 0
 
 
-async def search_products(search_params: ProductSearchParams) -> List[ProductResponse]:
+async def search_products(search_params: ProductSearchParams) -> Dict[str, Union[List[ProductResponse], int]]:
     db = get_db()
 
     # Build filter
@@ -202,36 +206,43 @@ async def search_products(search_params: ProductSearchParams) -> List[ProductRes
         filters["active"] = search_params.active
 
     # Add in_stock filter
-    if search_params.in_stock is not None and search_params.in_stock:
-        filters["stock"] = {"$gt": 0}
+    if search_params.in_stock is not None:
+        if search_params.in_stock:
+            filters["stock"] = {"$gt": 0}
+        else:
+            filters["stock"] = {"$lte": 0}
+
+    # Add exclude_ids filter
+    if search_params.exclude_ids:
+        filters["id"] = {"$nin": search_params.exclude_ids}
 
     # Calculate skip value for pagination
     skip = (search_params.page - 1) * search_params.size
 
-    # Determine sort order
-    sort_field = "created_at"
-    sort_direction = -1  # Default to newest first
+    # Build sort options
+    sort_options = {}
+    if search_params.sort_by == "newest":
+        sort_options["created_at"] = -1
+    elif search_params.sort_by == "price_asc":
+        sort_options["price"] = 1
+    elif search_params.sort_by == "price_desc":
+        sort_options["price"] = -1
+    elif search_params.sort_by == "name":
+        sort_options["name"] = 1
+    else:
+        sort_options["created_at"] = -1
 
-    if search_params.sort_by:
-        if search_params.sort_by == "price_asc":
-            sort_field = "price"
-            sort_direction = 1
-        elif search_params.sort_by == "price_desc":
-            sort_field = "price"
-            sort_direction = -1
-        elif search_params.sort_by == "rating":
-            sort_field = "average_rating"
-            sort_direction = -1
-        elif search_params.sort_by == "newest":
-            sort_field = "created_at"
-            sort_direction = -1
-
-    # Get products
-    cursor = db.products.find(filters).sort(sort_field, sort_direction).skip(skip).limit(search_params.size)
+    # Execute query
+    cursor = db.products.find(filters).sort(sort_options).skip(skip).limit(search_params.size)
     products = await cursor.to_list(length=search_params.size)
 
-    # Get additional information for each product
-    result = []
+    # Get total count
+    total = await db.products.count_documents(filters)
+
+    # Calculate total pages
+    pages = (total + search_params.size - 1) // search_params.size
+
+    # Get seller and category names
     for product in products:
         # Get seller name
         seller_id = product.get("seller_id")
@@ -251,17 +262,20 @@ async def search_products(search_params: ProductSearchParams) -> List[ProductRes
         product["seller_name"] = seller_name
         product["category_name"] = category_name
 
-        result.append(ProductResponse(**product))
-
-    return result
+    return {
+        "items": [ProductResponse(**product) for product in products],
+        "total": total,
+        "page": search_params.page,
+        "size": search_params.size,
+        "pages": pages
+    }
 
 
 async def get_featured_products(limit: int = 10) -> List[ProductResponse]:
     db = get_db()
 
     # Get featured products (those with highest average rating and review count > 0)
-    cursor = db.products.find({"active": True, "stock": {"$gt": 0}, "review_count": {"$gt": 0}}).sort("average_rating",
-                                                                                                      -1).limit(limit)
+    cursor = db.products.find({"active": True, "stock": {"$gt": 0}, "review_count": {"$gt": 0}}).sort("average_rating",-1).limit(limit)
     products = await cursor.to_list(length=limit)
 
     # If not enough products with reviews, get products by newest
@@ -269,9 +283,7 @@ async def get_featured_products(limit: int = 10) -> List[ProductResponse]:
         remaining = limit - len(products)
         # Exclude products we already got
         product_ids = [p.get("id") for p in products]
-        cursor = db.products.find({"active": True, "stock": {"$gt": 0}, "id": {"$nin": product_ids}}).sort("created_at",
-                                                                                                           -1).limit(
-            remaining)
+        cursor = db.products.find({"active": True, "stock": {"$gt": 0}, "id": {"$nin": product_ids}}).sort("created_at",-1).limit(remaining)
         additional_products = await cursor.to_list(length=remaining)
         products.extend(additional_products)
 

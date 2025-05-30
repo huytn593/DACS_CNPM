@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý danh mục - E-Commerce Shop</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="../index.html" class="navbar-brand">E-Commerce</a>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a href="../../pages/index.html" class="nav-link">Trang chủ</a></li>
+                    <li class="nav-item"><a href="../admin-dashboard.html" class="nav-link">Dashboard</a></li>
+                    <li class="nav-item"><a href="../../pages/admin/users.html" class="nav-link">Người dùng</a></li>
+                    <li class="nav-item"><a href="../../pages/admin/categories.html" class="nav-link active">Danh mục</a></li>
+                    <li class="nav-item"><a href="../../pages/admin/reports.html" class="nav-link">Báo cáo</a></li>
+                    <li class="nav-item" id="auth-container">
+                        <!-- Auth container will be filled dynamically -->
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="admin-section">
+            <h1>Quản lý danh mục</h1>
+
+            <div class="action-bar">
+                <button id="add-category-btn" class="btn">Thêm danh mục mới</button>
+            </div>
+
+            <div class="category-list" id="category-list">
+                <!-- Categories will be loaded here dynamically -->
+                <div class="loading">Đang tải danh mục...</div>
+            </div>
+
+            <!-- Add Category Modal -->
+            <div id="add-category-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Thêm danh mục mới</h2>
+                    <form id="add-category-form">
+                        <div class="form-group">
+                            <label for="category-name">Tên danh mục</label>
+                            <input type="text" id="category-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category-description">Mô tả</label>
+                            <textarea id="category-description" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="parent-category">Danh mục cha</label>
+                            <select id="parent-category" class="form-control">
+                                <option value="">Không có</option>
+                                <!-- Parent categories will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category-image">Hình ảnh (URL)</label>
+                            <input type="text" id="category-image" class="form-control">
+                        </div>
+                        <button type="submit" class="btn">Thêm danh mục</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Category Modal -->
+            <div id="edit-category-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Chỉnh sửa danh mục</h2>
+                    <form id="edit-category-form">
+                        <input type="hidden" id="edit-category-id">
+                        <div class="form-group">
+                            <label for="edit-category-name">Tên danh mục</label>
+                            <input type="text" id="edit-category-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-category-description">Mô tả</label>
+                            <textarea id="edit-category-description" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-parent-category">Danh mục cha</label>
+                            <select id="edit-parent-category" class="form-control">
+                                <option value="">Không có</option>
+                                <!-- Parent categories will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-category-image">Hình ảnh (URL)</label>
+                            <input type="text" id="edit-category-image" class="form-control">
+                        </div>
+                        <button type="submit" class="btn">Lưu thay đổi</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về chúng tôi</h3>
+                    <p>E-Commerce Shop cung cấp nền tảng mua sắm trực tuyến tin cậy và tiện lợi.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên hệ</h3>
+                    <p>Email: contact@ecommerce.com</p>
+                    <p>Điện thoại: (123) 456-7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Commerce Shop. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { getCategories, createCategory, updateCategory, deleteCategory } from '../../assets/js/adminService.js';
+        import auth from '../../assets/js/auth.js';
+
+        // Check admin permission
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                if (!auth.isAuthenticated()) {
+                    window.location.href = '../pages/login.html';
+                    return;
+                }
+
+                const user = auth.user;
+                if (!user || user.role !== 'admin') {
+                    alert('Bạn không có quyền truy cập trang này');
+                    window.location.href = '../pages/index.html';
+                    return;
+                }
+
+                // Initialize the page
+                await loadCategories();
+                setupEventListeners();
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                alert('Có lỗi xảy ra khi tải trang');
+            }
+        });
+
+        async function loadCategories() {
+            try {
+                const categoryList = document.getElementById('category-list');
+                categoryList.innerHTML = '<div class="loading">Đang tải danh mục...</div>';
+
+                const categories = await getCategories();
+
+                if (!categories || categories.length === 0) {
+                    categoryList.innerHTML = '<p>Không có danh mục nào.</p>';
+                    return;
+                }
+
+                let html = '<table class="data-table">';
+                html += '<thead><tr><th>Tên</th><th>Mô tả</th><th>Số sản phẩm</th><th>Hành động</th></tr></thead>';
+                html += '<tbody>';
+
+                categories.forEach(category => {
+                    html += `<tr data-id="${category.id}">
+                        <td>${category.name}</td>
+                        <td>${category.description || 'Không có mô tả'}</td>
+                        <td>${category.product_count || 0}</td>
+                        <td>
+                            <button class="btn-sm edit-category" data-id="${category.id}">Sửa</button>
+                            <button class="btn-sm delete-category" data-id="${category.id}">Xóa</button>
+                        </td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table>';
+                categoryList.innerHTML = html;
+
+                // Also populate parent category options
+                populateParentCategoryOptions(categories);
+
+                // Add event listeners for edit/delete buttons
+                document.querySelectorAll('.edit-category').forEach(btn => {
+                    btn.addEventListener('click', (e) => openEditModal(e.target.dataset.id));
+                });
+
+                document.querySelectorAll('.delete-category').forEach(btn => {
+                    btn.addEventListener('click', (e) => deleteCategoryHandler(e.target.dataset.id));
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                document.getElementById('category-list').innerHTML =
+                    '<p class="error">Có lỗi xảy ra khi tải danh mục. Vui lòng thử lại sau.</p>';
+            }
+        }
+
+        function populateParentCategoryOptions(categories) {
+            const addSelect = document.getElementById('parent-category');
+            const editSelect = document.getElementById('edit-parent-category');
+
+            // Clear existing options except the first one
+            while (addSelect.options.length > 1) {
+                addSelect.remove(1);
+            }
+
+            while (editSelect.options.length > 1) {
+                editSelect.remove(1);
+            }
+
+            // Add options for each category
+            categories.forEach(category => {
+                const addOption = document.createElement('option');
+                addOption.value = category.id;
+                addOption.textContent = category.name;
+                addSelect.appendChild(addOption);
+
+                const editOption = document.createElement('option');
+                editOption.value = category.id;
+                editOption.textContent = category.name;
+                editSelect.appendChild(editOption);
+            });
+        }
+
+        function setupEventListeners() {
+            // Add Category Button
+            document.getElementById('add-category-btn').addEventListener('click', () => {
+                document.getElementById('add-category-modal').style.display = 'block';
+            });
+
+            // Add Category Form
+            document.getElementById('add-category-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const categoryData = {
+                        name: document.getElementById('category-name').value,
+                        description: document.getElementById('category-description').value || null,
+                        parent_id: document.getElementById('parent-category').value || null,
+                        image: document.getElementById('category-image').value || null
+                    };
+
+                    await createCategory(categoryData);
+                    document.getElementById('add-category-modal').style.display = 'none';
+                    document.getElementById('add-category-form').reset();
+                    await loadCategories();
+                    alert('Thêm danh mục thành công!');
+                } catch (error) {
+                    console.error('Error creating category:', error);
+                    alert('Có lỗi xảy ra khi thêm danh mục: ' + error.message);
+                }
+            });
+
+            // Edit Category Form
+            document.getElementById('edit-category-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const categoryId = document.getElementById('edit-category-id').value;
+                    const categoryData = {
+                        name: document.getElementById('edit-category-name').value,
+                        description: document.getElementById('edit-category-description').value || null,
+                        parent_id: document.getElementById('edit-parent-category').value || null,
+                        image: document.getElementById('edit-category-image').value || null
+                    };
+
+                    await updateCategory(categoryId, categoryData);
+                    document.getElementById('edit-category-modal').style.display = 'none';
+                    await loadCategories();
+                    alert('Cập nhật danh mục thành công!');
+                } catch (error) {
+                    console.error('Error updating category:', error);
+                    alert('Có lỗi xảy ra khi cập nhật danh mục: ' + error.message);
+                }
+            });
+
+            // Close modal buttons
+            document.querySelectorAll('.close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', () => {
+                    document.getElementById('add-category-modal').style.display = 'none';
+                    document.getElementById('edit-category-modal').style.display = 'none';
+                });
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === document.getElementById('add-category-modal')) {
+                    document.getElementById('add-category-modal').style.display = 'none';
+                }
+                if (e.target === document.getElementById('edit-category-modal')) {
+                    document.getElementById('edit-category-modal').style.display = 'none';
+                }
+            });
+        }
+
+        async function openEditModal(categoryId) {
+            try {
+                const categories = await getCategories();
+                const category = categories.find(cat => cat.id === categoryId);
+
+                if (!category) {
+                    alert('Không tìm thấy danh mục');
+                    return;
+                }
+
+                document.getElementById('edit-category-id').value = category.id;
+                document.getElementById('edit-category-name').value = category.name;
+                document.getElementById('edit-category-description').value = category.description || '';
+                document.getElementById('edit-parent-category').value = category.parent_id || '';
+                document.getElementById('edit-category-image').value = category.image || '';
+
+                document.getElementById('edit-category-modal').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading category for edit:', error);
+                alert('Có lỗi xảy ra khi tải thông tin danh mục');
+            }
+        }
+
+        async function deleteCategoryHandler(categoryId) {
+            if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+                try {
+                    await deleteCategory(categoryId);
+                    await loadCategories();
+                    alert('Xóa danh mục thành công!');
+                } catch (error) {
+                    console.error('Error deleting category:', error);
+                    alert('Có lỗi xảy ra khi xóa danh mục: ' + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

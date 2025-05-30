@@ -6,10 +6,11 @@ from datetime import datetime
 from enum import Enum
 
 class OrderStatus(str, Enum):
-    pending = "pending"
-    shipped = "shipped"
-    delivered = "delivered"
-    canceled = "canceled"
+    pending = "pending"  # Initial state when order is created
+    seller_confirmed = "seller_confirmed"  # Seller has confirmed the order
+    shipped = "shipped"  # Order has been shipped
+    delivered = "delivered"  # User has confirmed receipt and payment is released to seller
+    canceled = "canceled"  # Order has been canceled
 
 class OrderItemBase(BaseModel):
     product_id: str
@@ -23,20 +24,22 @@ class OrderItem(OrderItemBase):
     product_image: Optional[str] = None
 
 class OrderBase(BaseModel):
-    id: str = Field(default_factory=lambda: str(ObjectId()))  # Changed from _id to id
+    id: str = Field(default_factory=lambda: str(ObjectId()))
     order_number: str
     user_id: str
     user_name: str
     total_amount: float
     items: List[OrderItem]
     shipping_address: str
-    billing_address: Optional[str] = None  # Fixed the type to str instead of using shipping_address as a type
+    billing_address: Optional[str] = None
     status: OrderStatus = OrderStatus.pending
-    payment_method: str
+    payment_method: str = "COD"  # Only COD is supported
     payment_status: str = "pending"
     notes: Optional[str] = None
     phone_number: str
-    shipping_fee: float = 30000  # Default shipping fee in VND
+    shipping_fee: float = 30000  # Fixed shipping fee in VND
+    admin_commission: float = 0  # 5% commission for admin
+    seller_amount: float = 0  # Amount seller receives after commission
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
@@ -44,7 +47,7 @@ class OrderCreate(BaseModel):
     shipping_address: str
     phone_number: str
     items: List[OrderItemBase]
-    payment_method: Optional[str] = "COD"
+    payment_method: str = "COD"  # Only COD is supported
 
 class Order(OrderBase):
     id: str

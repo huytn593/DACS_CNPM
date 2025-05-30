@@ -4,64 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Commerce Shop</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background: #fff; color: #111; }
+        .main-banner {
+            background: #000;
+            color: #fff;
+            border-radius: 16px;
+            padding: 2.5rem 2rem 2rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 260px;
+        }
+        .main-banner .banner-content {
+            max-width: 50%;
+        }
+        .main-banner h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .main-banner .btn {
+            margin-top: 1.5rem;
+            border-radius: 24px;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+        }
+        .main-banner .banner-img {
+            max-width: 320px;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .category-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            text-align: center;
+            padding: 1.2rem 0.5rem 0.8rem 0.5rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .category-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transform: translateY(-4px) scale(1.03);
+        }
+        .category-card i {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: #000;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #000;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        .product-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .product-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+            transform: translateY(-4px) scale(1.02);
+        }
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #f4f4f4;
+        }
+        .product-card .card-body {
+            padding: 1rem;
+        }
+        .product-card .card-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #111;
+        }
+        .product-card .card-price {
+            font-weight: bold;
+            color: #000;
+            font-size: 1.1rem;
+        }
+        .product-card .btn {
+            border-radius: 20px;
+            font-size: 0.95rem;
+            padding: 0.4rem 1.2rem;
+        }
+        .footer {
+            background: #111;
+            color: #fff;
+            padding: 2rem 0 1rem 0;
+            margin-top: 3rem;
+        }
+        .footer a { color: #fff; text-decoration: underline; }
+        .footer .footer-bottom { border-top: 1px solid #333; margin-top: 1rem; padding-top: 1rem; font-size: 0.95rem; }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <nav class="navbar">
-                <a href="/pages/index.html" class="navbar-brand">E-Commerce</a>
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a href="/pages/index.html" class="nav-link">Trang chủ</a></li>
-                    <li class="nav-item"><a href="/pages/categories.html" class="nav-link">Danh mục</a></li>
-                    <li class="nav-item" id="cart-container">
-                        <a href="/pages/cart.html" class="nav-link">Giỏ hàng (<span id="cart-count">0</span>)</a>
-                    </li>
-                    <li class="nav-item" id="auth-container">
-                        <a href="/pages/login.html" class="nav-link" id="login-link">Đăng nhập</a>
-                    </li>
-                </ul>
-            </nav>
+    <header class="header py-3 mb-4" style="background:#fff; border-bottom:1px solid #eee;">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="index.html" class="navbar-brand d-flex align-items-center gap-2" style="color:#000;font-size:2rem;font-weight:bold;text-decoration:none;">
+                <i class="bi bi-bag"></i> E-Commerce
+            </a>
+            <form id="search-form" class="d-flex align-items-center" style="gap:0.5rem;max-width:480px;flex:1;margin:0 2rem;">
+                <label for="search-input"></label>
+                <input type="text" id="search-input" class="form-control" placeholder="Tìm kiếm sản phẩm..." style="flex:1;">
+                <button type="submit" class="btn btn-dark"><i class="bi bi-search"></i></button>
+            </form>
+            <div class="d-flex align-items-center gap-3">
+                <a href="cart.html" class="position-relative" style="color:#000;font-size:1.5rem;">
+                    <i class="bi bi-cart"></i>
+                    <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" style="font-size:0.8rem;">0</span>
+                </a>
+                <div id="auth-container"></div>
+            </div>
         </div>
     </header>
 
     <main class="container">
-        <section class="hero" style="margin: 2rem 0;">
-            <h1>Chào mừng đến với E-Commerce Shop</h1>
-            <p>Khám phá các sản phẩm chất lượng cao với giá cả hợp lý</p>
+        <section class="main-banner">
+            <div class="banner-content">
+                <h1>Khám phá &amp; Mua sắm hiện đại</h1>
+                <p class="lead">Nền tảng thương mại điện tử tối giản, hiện đại, trải nghiệm mua sắm an toàn và tiện lợi cho mọi người.</p>
+                <a href="#products-section" class="btn btn-light text-dark shadow">Khám phá ngay <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <img src="../assets/img/banner-main.jpg" alt="Banner" class="banner-img d-none d-md-block">
         </section>
 
-        <section class="products">
-            <h2>Sản phẩm nổi bật</h2>
-            <div class="row" id="products-container">
-                <!-- Products will be loaded here dynamically -->
+        <section class="mb-4">
+            <div class="section-title">Danh mục nổi bật</div>
+            <div id="categories-container" class="category-grid"></div>
+        </section>
+
+        <section id="products-section" class="mb-4">
+            <div class="section-title">Sản phẩm nổi bật</div>
+            <div id="products-container" class="product-grid">
                 <div class="loading">Đang tải sản phẩm...</div>
             </div>
-            <div class="pagination" id="pagination-container">
-                <!-- Pagination will be loaded here dynamically -->
-            </div>
+            <div class="pagination" id="pagination-container"></div>
+        </section>
+
+        <section class="mb-4">
+            <div class="section-title">Gợi ý cho bạn</div>
+            <div id="suggested-products" class="product-grid"></div>
         </section>
     </main>
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Về chúng tôi</h3>
-                    <p>E-Commerce Shop cung cấp nền tảng mua sắm trực tuyến tin cậy và tiện lợi.</p>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h5 class="mb-2">E-Commerce Shop</h5>
+                    <p class="mb-1">Nền tảng mua sắm trực tuyến tối giản, hiện đại, an toàn và tiện lợi.</p>
+                    <p class="mb-0">&copy; 2024 E-Commerce Shop. All rights reserved.</p>
                 </div>
-                <div class="footer-section">
-                    <h3>Liên hệ</h3>
-                    <p>Email: contact@ecommerce.com</p>
-                    <p>Điện thoại: (123) 456-7890</p>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-2">Liên hệ: <a href="mailto:contact@ecommerce.com">contact@ecommerce.com</a></div>
+                    <div class="mb-2">Điện thoại: (123) 456-7890</div>
+                    <div>
+                        <a href="#" class="me-2"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="me-2"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-github"></i></a>
+                    </div>
                 </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 E-Commerce Shop. Tất cả quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
 
-    <script type="module" src="/assets/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="../assets/js/main.js"></script>
 </body>
 </html>

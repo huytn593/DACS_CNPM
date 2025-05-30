@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng - Admin</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body style="background:#f7f7f7;">
+    <div class="d-flex" style="min-height:100vh;">
+        <!-- Sidebar -->
+        <aside class="bg-white shadow-sm p-3" style="width:240px;">
+            <h2 class="mb-4 text-center">Admin</h2>
+            <ul class="nav flex-column gap-2">
+                <li class="nav-item"><a href="../admin-dashboard.html" class="nav-link">Dashboard</a></li>
+                <li class="nav-item"><a href="users.html" class="nav-link">Quản lý người dùng</a></li>
+                <li class="nav-item"><a href="orders.html" class="nav-link active">Quản lý đơn hàng</a></li>
+                <li class="nav-item"><a href="categories.html" class="nav-link">Quản lý danh mục</a></li>
+                <li class="nav-item"><a href="reports.html" class="nav-link">Báo cáo sản phẩm</a></li>
+                <li class="nav-item"><a href="settings.html" class="nav-link">Cài đặt</a></li>
+            </ul>
+        </aside>
+        <!-- Main Content -->
+        <main class="flex-grow-1 p-4">
+            <h3 class="mb-4">Quản lý đơn hàng</h3>
+            <div class="card shadow-sm p-3">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Ngày</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                        <tbody id="orders-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.js"></script>
+    <script type="module" src="../../assets/js/admin-orders.js"></script>
+</body>
+</html> 

@@ -1,0 +1,91 @@
+/* Bảng giỏ hàng chuyên nghiệp */
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    margin-bottom: 20px;
+}
+.cart-table th, .cart-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    vertical-align: middle;
+}
+.cart-seller-row {
+    background: #fafafa;
+    font-weight: bold;
+    text-align: left;
+}
+.cart-product-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.cart-product-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background: #fff;
+}
+.cart-product-detail {
+    text-align: left;
+}
+.cart-product-name {
+    font-weight: 500;
+    color: #222;
+    text-decoration: none;
+}
+.cart-product-category {
+    font-size: 13px;
+    color: #888;
+}
+.btn-link.compare-item {
+    color: #ff5722;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 14px;
+    margin-left: 8px;
+}
+.btn-icon.remove-item {
+    color: #e53935;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 8px;
+}
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.quantity-control input[type="number"] {
+    width: 48px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 0;
+}
+.quantity-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.cart-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 16px;
+}
+.cart-summary-row.total {
+    font-weight: bold;
+    color: #e53935;
+} 

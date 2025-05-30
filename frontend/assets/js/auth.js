@@ -1,84 +1,150 @@
-// frontend/assets/js/auth.js
+// assets/js/auth.js
 import api from './api.js';
-import { config } from '/config.js';
 
-class AuthService {
+class Auth {
     constructor() {
-        this.isAuthenticated = false;
-        this.user = null;
-        this.tokenKey = 'auth_token';
-
-        // Kiểm tra đăng nhập khi khởi tạo
-        this.checkAuth();
+        this.currentUser = null;
+        this.init();
     }
 
-    async checkAuth() {
-        const token = localStorage.getItem(this.tokenKey);
-        if (token) {
-            try {
-                // Lấy thông tin người dùng hiện tại
-                const user = await api.getCurrentUser();
-                this.isAuthenticated = true;
-                this.user = user;
-                return true;
-            } catch (error) {
-                console.error('Token không hợp lệ hoặc hết hạn:', error);
-                this.logout(false); // Không chuyển hướng khi kiểm tra ban đầu
-                return false;
-            }
-        }
-        return false;
-    }
-
-    async login(username, password) {
+    init() {
         try {
-            console.log('Attempting login with:', username);
-            const data = await api.login(username, password);
-            localStorage.setItem(this.tokenKey, data.access_token);
-            this.isAuthenticated = true;
-
-            // Lấy thông tin người dùng sau khi đăng nhập
-            if (data.user) {
-                this.user = data.user;
-            } else {
-                const user = await api.getCurrentUser();
-                this.user = user;
+            // Kiểm tra token và user data trong localStorage
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
+            if (token && userData) {
+                const parsedUser = JSON.parse(userData);
+                if (parsedUser && typeof parsedUser === 'object') {
+                    this.currentUser = parsedUser;
+                } else {
+                    // Invalid user data, clear storage
+                    this.clearSession();
+                }
             }
-
-            return this.user;
         } catch (error) {
-            console.error('Login error:', error);
-            throw error;
+            console.error('Error initializing auth:', error);
+            this.clearSession();
         }
     }
 
-    logout(redirect = true) {
-        localStorage.removeItem(this.tokenKey);
-        this.isAuthenticated = false;
-        this.user = null;
-
-        // Chuyển hướng về trang đăng nhập nếu cần
-        if (redirect) {
-            window.location.href = '/pages/login.html';
+    async login(email, password) {
+        try {
+            const response = await api.login(email, password);
+            if (!response.access_token || !response.user) {
+                throw new Error('Dữ liệu đăng nhập không hợp lệ');
+            }
+            this.setSession(response.access_token, response.user);
+            return response.user;
+        } catch (error) {
+            console.error('Error logging in:', error);
+            throw new Error(error.message || 'Đăng nhập thất bại');
         }
     }
 
-    isLoggedIn() {
-        return this.isAuthenticated;
+    async register(userData) {
+        try {
+            const response = await api.register(userData);
+            if (!response.access_token || !response.user) {
+                throw new Error('Dữ liệu đăng ký không hợp lệ');
+            }
+            this.setSession(response.access_token, response.user);
+            return response.user;
+        } catch (error) {
+            console.error('Error registering:', error);
+            throw new Error(error.message || 'Đăng ký thất bại');
+        }
     }
 
-    getUser() {
-        return this.user;
+    logout() {
+        this.clearSession();
+        window.location.href = '../pages/login.html';
+    }
+
+    clearSession() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        this.currentUser = null;
+    }
+
+    setSession(token, user) {
+        if (!token || !user) {
+            throw new Error('Invalid session data');
+        }
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        this.currentUser = user;
+    }
+
+    isAuthenticated() {
+        return !!this.currentUser && !!localStorage.getItem('token');
+    }
+
+    get user() {
+        if (!this.currentUser) {
+            return null;
+        }
+        return { ...this.currentUser }; // Return a copy to prevent direct modification
     }
 
     hasRole(role) {
-        return this.user && this.user.role === role;
+        return this.currentUser?.role === role;
     }
 
-    getToken() {
-        return localStorage.getItem(this.tokenKey);
+    isAdmin() {
+        return this.hasRole('admin');
+    }
+
+    isSeller() {
+        return this.hasRole('seller');
+    }
+
+    isUser() {
+        return this.hasRole('user');
+    }
+
+    async updateProfile(userData) {
+        try {
+            const updatedUser = await api.updateUserProfile(userData);
+            this.currentUser = updatedUser;
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return updatedUser;
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            throw new Error('Không thể cập nhật thông tin cá nhân');
+        }
+    }
+
+    async changePassword(currentPassword, newPassword) {
+        try {
+            await api.changePassword(currentPassword, newPassword);
+            return true;
+        } catch (error) {
+            console.error('Error changing password:', error);
+            throw new Error('Không thể đổi mật khẩu');
+        }
+    }
+
+    async forgotPassword(email) {
+        try {
+            await api.forgotPassword(email);
+            return true;
+        } catch (error) {
+            console.error('Error requesting password reset:', error);
+            throw new Error('Không thể gửi yêu cầu đặt lại mật khẩu');
+        }
+    }
+
+    async resetPassword(token, newPassword) {
+        try {
+            await api.resetPassword(token, newPassword);
+            return true;
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            throw new Error('Không thể đặt lại mật khẩu');
+        }
     }
 }
 
-// Khởi tạo và export
-export default new AuthService();
+const auth = new Auth();
+window.auth = auth; // Make auth globally available
+export default auth;

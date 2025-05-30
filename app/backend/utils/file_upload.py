@@ -6,6 +6,23 @@ import uuid
 from datetime import datetime
 from app.config import settings
 
+def ensure_placeholder_image():
+    """
+    Ensures that a placeholder image exists in the uploads directory.
+    Creates a simple SVG placeholder if it doesn't exist.
+    """
+    placeholder_path = os.path.join(settings.UPLOAD_DIR, 'placeholder.svg')
+    if not os.path.exists(placeholder_path):
+        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" version="1.1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+ <rect width="200" height="200" fill="#f0f0f0"/>
+ <text x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="14" fill="#666">No Image</text>
+</svg>'''
+        with open(placeholder_path, 'w', encoding='utf-8') as f:
+            f.write(svg_content)
+
+# Call this when the module is imported
+ensure_placeholder_image()
 
 async def save_upload_files(files: List[UploadFile], folder: str) -> List[str]:
     """
@@ -25,33 +42,32 @@ async def save_upload_files(files: List[UploadFile], folder: str) -> List[str]:
     upload_folder = os.path.join(settings.UPLOAD_DIR, folder)
     os.makedirs(upload_folder, exist_ok=True)
 
-    # Create date-based folder for better organization
-    today = datetime.now().strftime("%Y-%m-%d")
-    date_folder = os.path.join(upload_folder, today)
-    os.makedirs(date_folder, exist_ok=True)
-
     saved_paths = []
 
-    for file in files:
-        if not file.filename:
-            continue
+    try:
+        # Save each file
+        for file in files:
+            if file.filename:
+                # Generate unique filename with date prefix
+                file_extension = os.path.splitext(file.filename)[1]
+                today = datetime.now().strftime("%Y%m%d")
+                unique_filename = f"{today}_{uuid.uuid4()}{file_extension}"
+                file_path = os.path.join(upload_folder, unique_filename)
 
-        # Generate unique filename
-        filename = f"{uuid.uuid4()}_{file.filename}"
-        file_path = os.path.join(date_folder, filename)
+                # Save file
+                with open(file_path, "wb") as f:
+                    f.write(await file.read())
 
-        # Save file with type-safe approach
-        contents = await file.read()
-        with open(file_path, "wb") as buffer:
-            buffer.write(contents)
+                # Add relative path to list
+                saved_paths.append(f"/uploads/{folder}/{unique_filename}")
 
-        # Get path relative to UPLOAD_DIR
-        relative_path = os.path.relpath(file_path, settings.UPLOAD_DIR)
-        relative_path = relative_path.replace("\\", "/")  # Normalize for all operating systems
+        return saved_paths
 
-        saved_paths.append(f"/media/{relative_path}")
-
-    return saved_paths
+    except (OSError, IOError, PermissionError) as e:
+        # Log the error for debugging
+        print(f"Error saving files: {str(e)}")
+        # Return empty list on error to maintain return type
+        return []
 
 
 async def delete_file(file_path: str) -> bool:
@@ -78,6 +94,7 @@ async def delete_file(file_path: str) -> bool:
     try:
         os.remove(actual_path)
         return True
-    except (OSError, IOError, PermissionError) as e:
-        # Specify the exceptions we expect might occur
+    except (OSError, IOError, PermissionError):
+        # Log the error for debugging
+        print(f"Error deleting file: {file_path}")
         return False

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài đặt quản trị viên - E-Commerce Admin</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="../../index.html" class="navbar-brand">E-Commerce</a>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a href="../../index.html" class="nav-link">Trang chủ</a></li>
+                    <li class="nav-item"><a href="categories.html" class="nav-link">Quản lý danh mục</a></li>
+                    <li class="nav-item"><a href="users.html" class="nav-link">Quản lý người dùng</a></li>
+                    <li class="nav-item"><a href="orders.html" class="nav-link">Quản lý đơn hàng</a></li>
+                    <li class="nav-item"><a href="reports.html" class="nav-link">Báo cáo</a></li>
+                    <li class="nav-item active"><a href="settings.html" class="nav-link">Cài đặt</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        <section class="settings-section">
+            <div class="settings-tabs">
+                <ul class="tabs-nav">
+                    <li class="tab-item active" data-tab="profile">Thông tin quản trị viên</li>
+                    <li class="tab-item" data-tab="password">Đổi mật khẩu</li>
+                    <li class="tab-item" data-tab="platform">Cài đặt hệ thống</li>
+                </ul>
+                <div class="tab-content">
+                    <div id="profile-container" class="tab-pane active">
+                        <div class="loading">Đang tải thông tin quản trị viên...</div>
+                    </div>
+                    <div id="password-container" class="tab-pane">
+                        <div class="loading">Đang tải...</div>
+                    </div>
+                    <div id="platform-container" class="tab-pane">
+                        <div class="loading">Đang tải cài đặt hệ thống...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về chúng tôi</h3>
+                    <p>E-Commerce Shop cung cấp nền tảng mua sắm trực tuyến tin cậy và tiện lợi.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên hệ</h3>
+                    <p>Email: contact@ecommerce.com</p>
+                    <p>Điện thoại: (123) 456-7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Commerce Shop. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+    <script type="module" src="../../assets/js/admin-settings.js"></script>
+</body>
+</html> 

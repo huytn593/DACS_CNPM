@@ -69,13 +69,19 @@ async def register_user(user: UserCreate) -> UserResponse:
 
 
 async def authenticate_user(identifier: str, password: str) -> Optional[Dict[str, Any]]:
+    """
+    Authenticate a user by email/username and password
+    """
     db = get_db()
+
     print(f"Attempting to authenticate user with identifier: {identifier}")
 
+    # Try finding user by email first
     user = await db.users.find_one({"email": identifier})
     if user:
         print(f"User found by email: {identifier}")
 
+    # If not found by email, try username
     if not user:
         user = await db.users.find_one({"username": identifier})
         if user:
@@ -85,17 +91,15 @@ async def authenticate_user(identifier: str, password: str) -> Optional[Dict[str
         print(f"No user found with identifier: {identifier}")
         return None
 
+    # Verify password
     is_valid = verify_password(password, user["hashed_password"])
     print(f"Password verification result: {is_valid}")
 
     if not is_valid:
         return None
 
-    # Đảm bảo luôn có trường 'id'
-    if "id" not in user and "_id" in user:
-        user["id"] = str(user["_id"])
-
     return user
+
 
 async def update_profile(user_id: str, user_update: UserUpdate) -> UserResponse:
     """
